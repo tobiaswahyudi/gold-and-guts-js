@@ -3,12 +3,12 @@ import { Play } from './Play';
 import Phaser from 'phaser';
 
 const config = {
-    title: 'Card Memory Game',
+    title: 'Gold and Guts',
     type: Phaser.AUTO,
-    width: 549,
-    height: 480,
+    width: 1024,
+    height: 640,
     parent: 'game-container',
-    backgroundColor: '#192a56',
+    backgroundColor: '#141414',
     pixelArt: true,
     scale: {
         mode: Phaser.Scale.FIT,
