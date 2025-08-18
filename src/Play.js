@@ -58,11 +58,13 @@ export class Play extends Phaser.Scene {
                 this.attackField.y + this.attackField.height,
                 "DEFEND DEFEND DEFEND",
                 {
-                    fontSize: 33,
+                    fontSize: 40,
                     fontStyle: "bold",
                     color: "#6f947f",
+                    fontFamily: "Alkhemikal",
                 }
             )
+            .setResolution(8)
             .setOrigin(0, 1)
             .setRotation(-Math.PI / 2);
 
@@ -72,11 +74,13 @@ export class Play extends Phaser.Scene {
                 this.defenseField.y,
                 "ATTACK ATTACK ATTACK",
                 {
-                    fontSize: 33,
+                    fontSize: 39,
                     fontStyle: "bold",
                     color: "#E0BFA7",
+                    fontFamily: "Alkhemikal",
                 }
             )
+            .setResolution(8)
             .setOrigin(0, 1)
             .setRotation(Math.PI / 2);
 
@@ -84,25 +88,26 @@ export class Play extends Phaser.Scene {
             .text(
                 this.sys.game.scale.width / 2,
                 this.sys.game.scale.height / 2,
-                "Gold and Guts",
+                "Guts and Gold",
                 {
                     align: "center",
-                    strokeThickness: 4,
-                    fontSize: 40,
+                    fontSize: 120,
                     fontStyle: "bold",
-                    color: "#8c7ae6",
+                    color: "#ffffff",
+                    fontFamily: "Alkhemikal",
                 }
             )
+            .setResolution(8)
             .setOrigin(0.5)
             .setDepth(3)
             .setInteractive();
 
         titleText.on(Phaser.Input.Events.POINTER_OVER, () => {
-            titleText.setColor("#9c88ff");
+            titleText.setColor("#eeeeee");
             this.input.setDefaultCursor("pointer");
         });
         titleText.on(Phaser.Input.Events.POINTER_OUT, () => {
-            titleText.setColor("#8c7ae6");
+            titleText.setColor("#ffffff");
             this.input.setDefaultCursor("default");
         });
         titleText.on(Phaser.Input.Events.POINTER_DOWN, () => {
