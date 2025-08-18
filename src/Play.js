@@ -1,5 +1,5 @@
-import { createCard } from './createCard';
-import Phaser from 'phaser';
+import { createCard } from "./createCard";
+import Phaser from "phaser";
 
 /**
  * Card Memory Game by Francisco Pereira (Gammafp)
@@ -13,8 +13,7 @@ import Phaser from 'phaser';
  * "Fat Caps" by Audionautix is licensed under the Creative Commons Attribution 4.0 license. https://creativecommons.org/licenses/by/4.0/
  * Artist http://audionautix.com/
  */
-export class Play extends Phaser.Scene
-{
+export class Play extends Phaser.Scene {
     // All cards names
     cardNames = ["card-0", "card-1", "card-2", "card-3", "card-4", "card-5"];
     // Cards Game Objects
@@ -34,41 +33,53 @@ export class Play extends Phaser.Scene
         x: 113,
         y: 102,
         paddingX: 10,
-        paddingY: 10
-    }
+        paddingY: 10,
+    };
 
-    constructor ()
-    {
+    constructor() {
         super({
-            key: 'Play'
+            key: "Play",
         });
     }
 
-    init ()
-    {
+    init() {
         // Fadein camera
         this.cameras.main.fadeIn(500);
         this.lives = 10;
         this.volumeButton();
     }
 
-    create ()
-    {
+    create() {
         // Background image
-        this.add.image(this.gridConfiguration.x - 63, this.gridConfiguration.y - 77, "background").setOrigin(0);
+        this.add
+            .image(
+                this.gridConfiguration.x - 63,
+                this.gridConfiguration.y - 77,
+                "background"
+            )
+            .setOrigin(0);
 
-        const titleText = this.add.text(this.sys.game.scale.width / 2, this.sys.game.scale.height / 2,
-            "Memory Card Game\nClick to Play",
-            { align: "center", strokeThickness: 4, fontSize: 40, fontStyle: "bold", color: "#8c7ae6" }
-        )
-            .setOrigin(.5)
+        const titleText = this.add
+            .text(
+                this.sys.game.scale.width / 2,
+                this.sys.game.scale.height / 2,
+                "Memory Card Game\nClick to Play",
+                {
+                    align: "center",
+                    strokeThickness: 4,
+                    fontSize: 40,
+                    fontStyle: "bold",
+                    color: "#8c7ae6",
+                }
+            )
+            .setOrigin(0.5)
             .setDepth(3)
             .setInteractive();
         // title tween like retro arcade
         this.add.tween({
             targets: titleText,
             duration: 800,
-            ease: (value) => (value > .8),
+            ease: (value) => value > 0.8,
             alpha: 0,
             repeat: -1,
             yoyo: true,
@@ -91,16 +102,18 @@ export class Play extends Phaser.Scene
                 y: -1000,
                 onComplete: () => {
                     if (!this.sound.get("theme-song")) {
-                        this.sound.play("theme-song", { loop: true, volume: .5 });
+                        this.sound.play("theme-song", {
+                            loop: true,
+                            volume: 0.5,
+                        });
                     }
                     this.startGame();
-                }
-            })
+                },
+            });
         });
     }
 
-    restartGame ()
-    {
+    restartGame() {
         this.cardOpened = undefined;
         this.cameras.main.fadeOut(200 * this.cards.length);
         this.cards.reverse().map((card, index) => {
@@ -111,8 +124,8 @@ export class Play extends Phaser.Scene
                 delay: index * 100,
                 onComplete: () => {
                     card.gameObject.destroy();
-                }
-            })
+                },
+            });
         });
 
         this.time.addEvent({
@@ -122,55 +135,62 @@ export class Play extends Phaser.Scene
                 this.canMove = false;
                 this.scene.restart();
                 this.sound.play("card-slide", { volume: 1.2 });
-            }
-        })
+            },
+        });
     }
 
-    createGridCards ()
-    {
+    createGridCards() {
         // Phaser random array position
-        const gridCardNames = Phaser.Utils.Array.Shuffle([...this.cardNames, ...this.cardNames]);
+        const gridCardNames = Phaser.Utils.Array.Shuffle([
+            ...this.cardNames,
+            ...this.cardNames,
+        ]);
 
         return gridCardNames.map((name, index) => {
             const newCard = createCard({
                 scene: this,
-                x: this.gridConfiguration.x + (98 + this.gridConfiguration.paddingX) * (index % 4),
+                x:
+                    this.gridConfiguration.x +
+                    (98 + this.gridConfiguration.paddingX) * (index % 4),
                 y: -1000,
                 frontTexture: name,
-                cardName: name
+                cardName: name,
             });
             this.add.tween({
                 targets: newCard.gameObject,
                 duration: 800,
                 delay: index * 100,
                 onStart: () => this.sound.play("card-slide", { volume: 1.2 }),
-                y: this.gridConfiguration.y + (128 + this.gridConfiguration.paddingY) * Math.floor(index / 4)
-            })
+                y:
+                    this.gridConfiguration.y +
+                    (128 + this.gridConfiguration.paddingY) *
+                        Math.floor(index / 4),
+            });
             return newCard;
         });
     }
 
-    createHearts ()
-    {
+    createHearts() {
         return Array.from(new Array(this.lives)).map((el, index) => {
-            const heart = this.add.image(this.sys.game.scale.width + 1000, 20, "heart")
-                .setScale(2)
+            const heart = this.add
+                .image(this.sys.game.scale.width + 1000, 20, "heart")
+                .setScale(2);
 
             this.add.tween({
                 targets: heart,
                 ease: Phaser.Math.Easing.Expo.InOut,
                 duration: 1000,
                 delay: 1000 + index * 200,
-                x: 140 + 30 * index // marginLeft + spaceBetween * index
+                x: 140 + 30 * index, // marginLeft + spaceBetween * index
             });
             return heart;
         });
     }
 
-
-    volumeButton ()
-    {
-        const volumeIcon = this.add.image(25, 25, "volume-icon").setName("volume-icon");
+    volumeButton() {
+        const volumeIcon = this.add
+            .image(25, 25, "volume-icon")
+            .setName("volume-icon");
         volumeIcon.setInteractive();
 
         // Mouse enter
@@ -183,7 +203,6 @@ export class Play extends Phaser.Scene
             this.input.setDefaultCursor("default");
         });
 
-
         volumeIcon.on(Phaser.Input.Events.POINTER_DOWN, () => {
             if (this.sound.volume === 0) {
                 this.sound.setVolume(1);
@@ -192,28 +211,41 @@ export class Play extends Phaser.Scene
             } else {
                 this.sound.setVolume(0);
                 volumeIcon.setTexture("volume-icon_off");
-                volumeIcon.setAlpha(.5)
+                volumeIcon.setAlpha(0.5);
             }
         });
     }
 
-    startGame ()
-    {
-
+    startGame() {
         // WinnerText and GameOverText
-        const winnerText = this.add.text(this.sys.game.scale.width / 2, -1000, "YOU WIN",
-            { align: "center", strokeThickness: 4, fontSize: 40, fontStyle: "bold", color: "#8c7ae6" }
-        ).setOrigin(.5)
+        const winnerText = this.add
+            .text(this.sys.game.scale.width / 2, -1000, "YOU WIN", {
+                align: "center",
+                strokeThickness: 4,
+                fontSize: 40,
+                fontStyle: "bold",
+                color: "#8c7ae6",
+            })
+            .setOrigin(0.5)
             .setDepth(3)
             .setInteractive();
 
-        const gameOverText = this.add.text(this.sys.game.scale.width / 2, -1000,
-            "GAME OVER\nClick to restart",
-            { align: "center", strokeThickness: 4, fontSize: 40, fontStyle: "bold", color: "#ff0000" }
-        )
+        const gameOverText = this.add
+            .text(
+                this.sys.game.scale.width / 2,
+                -1000,
+                "GAME OVER\nClick to restart",
+                {
+                    align: "center",
+                    strokeThickness: 4,
+                    fontSize: 40,
+                    fontStyle: "bold",
+                    color: "#ff0000",
+                }
+            )
             .setName("gameOverText")
             .setDepth(3)
-            .setOrigin(.5)
+            .setOrigin(0.5)
             .setInteractive();
 
         // Start lifes images
@@ -227,18 +259,20 @@ export class Play extends Phaser.Scene
             delay: 200 * this.cards.length,
             callback: () => {
                 this.canMove = true;
-            }
+            },
         });
 
         // Game Logic
         this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer) => {
             if (this.canMove) {
-                const card = this.cards.find(card => card.gameObject.hasFaceAt(pointer.x, pointer.y));
+                const card = this.cards.find((card) =>
+                    card.gameObject.hasFaceAt(pointer.x, pointer.y)
+                );
                 if (card) {
                     this.input.setDefaultCursor("pointer");
                 } else {
-                    if(go[0]) {
-                        if(go[0].name !== "volume-icon") {
+                    if (go[0]) {
+                        if (go[0].name !== "volume-icon") {
                             this.input.setDefaultCursor("pointer");
                         }
                     } else {
@@ -249,7 +283,9 @@ export class Play extends Phaser.Scene
         });
         this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer) => {
             if (this.canMove && this.cards.length) {
-                const card = this.cards.find(card => card.gameObject.hasFaceAt(pointer.x, pointer.y));
+                const card = this.cards.find((card) =>
+                    card.gameObject.hasFaceAt(pointer.x, pointer.y)
+                );
 
                 if (card) {
                     this.canMove = false;
@@ -257,7 +293,11 @@ export class Play extends Phaser.Scene
                     // Detect if there is a card opened
                     if (this.cardOpened !== undefined) {
                         // If the card is the same that the opened not do anything
-                        if (this.cardOpened.gameObject.x === card.gameObject.x && this.cardOpened.gameObject.y === card.gameObject.y) {
+                        if (
+                            this.cardOpened.gameObject.x ===
+                                card.gameObject.x &&
+                            this.cardOpened.gameObject.y === card.gameObject.y
+                        ) {
                             this.canMove = true;
                             return false;
                         }
@@ -271,11 +311,13 @@ export class Play extends Phaser.Scene
                                 card.destroy();
 
                                 // remove card destroyed from array
-                                this.cards = this.cards.filter(cardLocal => cardLocal.cardName !== card.cardName);
+                                this.cards = this.cards.filter(
+                                    (cardLocal) =>
+                                        cardLocal.cardName !== card.cardName
+                                );
                                 // reset history card opened
                                 this.cardOpened = undefined;
                                 this.canMove = true;
-
                             } else {
                                 // ------- No match -------
                                 this.sound.play("card-mismatch");
@@ -286,11 +328,11 @@ export class Play extends Phaser.Scene
                                     targets: lastHeart,
                                     ease: Phaser.Math.Easing.Expo.InOut,
                                     duration: 1000,
-                                    y: - 1000,
+                                    y: -1000,
                                     onComplete: () => {
                                         lastHeart.destroy();
                                         hearts.pop();
-                                    }
+                                    },
                                 });
                                 this.lives -= 1;
                                 // Flip last card selected and flip the card opened from history and reset history
@@ -298,7 +340,6 @@ export class Play extends Phaser.Scene
                                 this.cardOpened.flip(() => {
                                     this.cardOpened = undefined;
                                     this.canMove = true;
-
                                 });
                             }
 
@@ -328,8 +369,11 @@ export class Play extends Phaser.Scene
                                 this.canMove = false;
                             }
                         });
-
-                    } else if (this.cardOpened === undefined && this.lives > 0 && this.cards.length > 0) {
+                    } else if (
+                        this.cardOpened === undefined &&
+                        this.lives > 0 &&
+                        this.cards.length > 0
+                    ) {
                         // If there is not a card opened save the card selected
                         card.flip(() => {
                             this.canMove = true;
@@ -338,9 +382,7 @@ export class Play extends Phaser.Scene
                     }
                 }
             }
-
         });
-
 
         // Text events
         winnerText.on(Phaser.Input.Events.POINTER_OVER, () => {
@@ -359,8 +401,8 @@ export class Play extends Phaser.Scene
                 y: -1000,
                 onComplete: () => {
                     this.restartGame();
-                }
-            })
+                },
+            });
         });
 
         gameOverText.on(Phaser.Input.Events.POINTER_OVER, () => {
@@ -380,9 +422,9 @@ export class Play extends Phaser.Scene
                 y: -1000,
                 onComplete: () => {
                     this.restartGame();
-                }
-            })
+                },
+            });
         });
     }
-
 }
+

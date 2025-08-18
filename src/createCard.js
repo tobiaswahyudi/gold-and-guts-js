@@ -1,20 +1,14 @@
 /**
  * Create a card game object
  */
-export const createCard = ({
-    scene,
-    x,
-    y,
-    frontTexture,
-    cardName
-}) => {
-
+export const createCard = ({ scene, x, y, frontTexture, cardName }) => {
     let isFlipping = false;
     const rotation = { y: 0 };
 
     const backTexture = "card-back";
 
-    const card = scene.add.plane(x, y, backTexture)
+    const card = scene.add
+        .plane(x, y, backTexture)
         .setName(cardName)
         .setInteractive();
 
@@ -27,7 +21,7 @@ export const createCard = ({
         }
         scene.add.tween({
             targets: [rotation],
-            y: (rotation.y === 180) ? 0 : 180,
+            y: rotation.y === 180 ? 0 : 180,
             ease: Phaser.Math.Easing.Expo.Out,
             duration: 500,
             onStart: () => {
@@ -43,19 +37,21 @@ export const createCard = ({
                         },
                         {
                             duration: 300,
-                            scale: 1
+                            scale: 1,
                         },
-                    ]
-                })
+                    ],
+                });
             },
             onUpdate: () => {
                 // card.modelRotation.y = Phaser.Math.DegToRad(180) + Phaser.Math.DegToRad(rotation.y);
                 card.rotateY = 180 + rotation.y;
                 const cardRotation = Math.floor(card.rotateY) % 360;
-                if ((cardRotation >= 0 && cardRotation <= 90) || (cardRotation >= 270 && cardRotation <= 359)) {
+                if (
+                    (cardRotation >= 0 && cardRotation <= 90) ||
+                    (cardRotation >= 270 && cardRotation <= 359)
+                ) {
                     card.setTexture(frontTexture);
-                }
-                else {
+                } else {
                     card.setTexture(backTexture);
                 }
             },
@@ -64,9 +60,9 @@ export const createCard = ({
                 if (callbackComplete) {
                     callbackComplete();
                 }
-            }
+            },
         });
-    }
+    };
 
     const destroy = () => {
         scene.add.tween({
@@ -76,14 +72,15 @@ export const createCard = ({
             duration: 500,
             onComplete: () => {
                 card.destroy();
-            }
-        })
-    }
+            },
+        });
+    };
 
     return {
         gameObject: card,
         flip: flipCard,
         destroy,
-        cardName
-    }
-}
+        cardName,
+    };
+};
+

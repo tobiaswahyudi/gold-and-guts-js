@@ -1,16 +1,13 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
-export class Preloader extends Phaser.Scene
-{
-    constructor()
-    {
+export class Preloader extends Phaser.Scene {
+    constructor() {
         super({
-            key: 'Preloader'
+            key: "Preloader",
         });
     }
 
-    preload ()
-    {
+    preload() {
         this.load.setPath("assets/");
 
         this.load.audio("theme-song", "audio/fat-caps-audionatix.mp3");
@@ -23,8 +20,7 @@ export class Preloader extends Phaser.Scene
         this.load.image("heart", "ui/heart.png");
     }
 
-    create ()
-    {
+    create() {
         this.scene.start("Play");
     }
 }
