@@ -59,11 +59,11 @@ export class Play extends Phaser.Scene {
 
         // const rec = this.add.rectangle(100, 500, 100, 160)
 
-        this.add
+        const defendText = this.add
             .text(
                 this.attackField.x,
-                this.attackField.y + this.attackField.height,
-                "DEFEND DEFEND DEFEND",
+                this.attackField.y + this.attackField.height + 130,
+                "DEFEND DEFEND DEFEND DEFEND",
                 {
                     fontSize: 40,
                     fontStyle: "bold",
@@ -75,11 +75,31 @@ export class Play extends Phaser.Scene {
             .setOrigin(0, 1)
             .setRotation(-Math.PI / 2);
 
-        this.add
+        const defendTextMask = this.add
+            .rectangle(
+                this.attackField.x,
+                this.attackField.y,
+                40,
+                this.attackField.height
+            )
+            .setOrigin(1, 0)
+            .setFillStyle(0x000000)
+            .setVisible(false)
+            .createGeometryMask();
+        defendText.setMask(defendTextMask);
+
+        this.add.tween({
+            targets: defendText,
+            y: this.attackField.y + this.attackField.height,
+            duration: 6000,
+            repeat: -1,
+        });
+
+        const attackText = this.add
             .text(
                 this.defenseField.x + this.defenseField.width,
-                this.defenseField.y,
-                "ATTACK ATTACK ATTACK",
+                this.defenseField.y - 136,
+                "ATTACK ATTACK ATTACK ATTACK",
                 {
                     fontSize: 39,
                     fontStyle: "bold",
@@ -90,6 +110,27 @@ export class Play extends Phaser.Scene {
             .setResolution(8)
             .setOrigin(0, 1)
             .setRotation(Math.PI / 2);
+
+        const attackTextMask = this.add
+
+            .rectangle(
+                this.defenseField.x + this.defenseField.width,
+                this.defenseField.y,
+                40,
+                this.defenseField.height
+            )
+            .setOrigin(0, 0)
+            .setFillStyle(0x000000)
+            .setVisible(false)
+            .createGeometryMask();
+        attackText.setMask(attackTextMask);
+
+        this.add.tween({
+            targets: attackText,
+            y: this.defenseField.y,
+            duration: 6000,
+            repeat: -1,
+        });
 
         // const titleText = this.add
         //     .text(
@@ -186,7 +227,7 @@ export class Play extends Phaser.Scene {
             .setAlign("right")
             .setResolution(8)
             .setOrigin(0, 0);
-        
+
         this.add
             .text(120, 575, "033 Guts")
             .setColor("#D61D4B")
