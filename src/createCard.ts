@@ -29,23 +29,45 @@ export const createCard = ({
     const cardWidth = 120;
     const cardHeight = 160;
 
-    const cardTextDelta = cardHeight * -0.5 + 10;
+    const cardTextDelta = cardHeight * -0.5 + 12;
 
-    const cardGroup = scene.add.container(x, y).setSize(cardWidth, cardHeight).setInteractive();
+    const cardGroup = scene.add
+        .container(x, y)
+        .setSize(cardWidth, cardHeight)
+        .setInteractive();
 
-    const card = cardGroup.add(
-        scene.add
-            .rectangle(0, 0, cardWidth, cardHeight)
-            .setFillStyle(0xbbbbbb)
-            .setName(cardName)
-            .setInteractive()
-    );
+    const card = scene.add
+        .rectangle(0, 0, cardWidth, cardHeight)
+        .setFillStyle(0xbbbbbb)
+        .setName(cardName)
+        .setInteractive();
+
+    cardGroup.add(card);
 
     cardGroup.add(
         scene.add
             .text(0, cardTextDelta, cardName)
             .setColor("#ffffff")
             .setFontSize(16)
+            .setFontFamily("Alkhemikal")
+            .setAlign("center")
+            .setResolution(8)
+            .setOrigin(0.5, 0.5)
+    );
+
+    cardGroup.add(
+        scene.add
+        .rectangle(0, -20, cardWidth - 12, 72)
+        .setFillStyle(0xeeeeee)
+    );
+
+    cardGroup.add(
+        scene.add
+            .text(0, 22, cardDescription, {
+                wordWrap: { width: cardWidth - 20 },
+            })
+            .setColor("#ffffff")
+            .setFontSize(10)
             .setFontFamily("Alkhemikal")
             .setAlign("center")
             .setResolution(8)
@@ -59,19 +81,11 @@ export const createCard = ({
 
         scene.add.tween({
             targets: cardGroup,
-            y: y - cardHeight * 0.5,
-            scale: 1.2,
+            y: y - cardHeight * 0.25,
+            scale: 1.5,
             duration: 100,
             ease: "Power2.easeInOut",
         });
-
-        // scene.add.tween({
-        //     targets: [cardText],
-        //     y: y + (cardTextDelta - (cardHeight * 0.5)) * 1.2,
-        //     scale: 1.2,
-        //     duration: 100,
-        //     ease: "Power2.easeInOut",
-        // });
     };
 
     const lowerCard = () => {
@@ -84,22 +98,14 @@ export const createCard = ({
             duration: 100,
             ease: "Power2.easeInOut",
         });
-
-        // scene.add.tween({
-        //     targets: [cardText],
-        //     y: y + cardTextDelta,
-        //     scale: 1,
-        //     duration: 100,
-        //     ease: "Power2.easeInOut",
-        // });
     };
 
-    cardGroup.on(Phaser.Input.Events.POINTER_OVER, () => {
+    card.on(Phaser.Input.Events.POINTER_OVER, () => {
         raiseCard();
         scene.input.setDefaultCursor("pointer");
     });
 
-    cardGroup.on(Phaser.Input.Events.POINTER_OUT, () => {
+    card.on(Phaser.Input.Events.POINTER_OUT, () => {
         lowerCard();
         scene.input.setDefaultCursor("default");
     });
