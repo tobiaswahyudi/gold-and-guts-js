@@ -1,4 +1,5 @@
 import { createCard } from "./createCard";
+import { Battlefield } from "./battlefield/battlefield";
 import Phaser from "phaser";
 
 export class Play extends Phaser.Scene {
@@ -7,14 +8,14 @@ export class Play extends Phaser.Scene {
     hoveredCardIndex = -1;
 
     // Grid configuration
-    attackField = {
+    defenseField = {
         x: 100,
         y: 32,
         width: 400,
         height: 400,
     };
 
-    defenseField = {
+    attackField = {
         x: 524,
         y: 32,
         width: 400,
@@ -38,10 +39,10 @@ export class Play extends Phaser.Scene {
 
     create() {
         const attackGrid = this.add.grid(
-            this.attackField.x + this.attackField.width / 2,
-            this.attackField.y + this.attackField.height / 2,
-            this.attackField.width,
-            this.attackField.height,
+            this.defenseField.x + this.defenseField.width / 2,
+            this.defenseField.y + this.defenseField.height / 2,
+            this.defenseField.width,
+            this.defenseField.height,
             20,
             20
         );
@@ -50,10 +51,10 @@ export class Play extends Phaser.Scene {
         attackGrid.setOutlineStyle();
 
         const defenseGrid = this.add.grid(
-            this.defenseField.x + this.defenseField.width / 2,
-            this.defenseField.y + this.defenseField.height / 2,
-            this.defenseField.width,
-            this.defenseField.height,
+            this.attackField.x + this.attackField.width / 2,
+            this.attackField.y + this.attackField.height / 2,
+            this.attackField.width,
+            this.attackField.height,
             20,
             20
         );
@@ -65,8 +66,8 @@ export class Play extends Phaser.Scene {
 
         const defendText = this.add
             .text(
-                this.attackField.x,
-                this.attackField.y + this.attackField.height + 130,
+                this.defenseField.x,
+                this.defenseField.y + this.defenseField.height + 130,
                 "DEFEND DEFEND DEFEND DEFEND",
                 {
                     fontSize: 40,
@@ -75,16 +76,16 @@ export class Play extends Phaser.Scene {
                     fontFamily: "Alkhemikal",
                 }
             )
-            .setResolution(8)
+            .setResolution(2)
             .setOrigin(0, 1)
             .setRotation(-Math.PI / 2);
 
         const defendTextMask = this.add
             .rectangle(
-                this.attackField.x,
-                this.attackField.y,
+                this.defenseField.x,
+                this.defenseField.y,
                 40,
-                this.attackField.height
+                this.defenseField.height
             )
             .setOrigin(1, 0)
             .setFillStyle(0x000000)
@@ -94,15 +95,15 @@ export class Play extends Phaser.Scene {
 
         this.add.tween({
             targets: defendText,
-            y: this.attackField.y + this.attackField.height,
+            y: this.defenseField.y + this.defenseField.height,
             duration: 6000,
             repeat: -1,
         });
 
         const attackText = this.add
             .text(
-                this.defenseField.x + this.defenseField.width,
-                this.defenseField.y - 136,
+                this.attackField.x + this.attackField.width,
+                this.attackField.y - 136,
                 "ATTACK ATTACK ATTACK ATTACK",
                 {
                     fontSize: 39,
@@ -111,17 +112,17 @@ export class Play extends Phaser.Scene {
                     fontFamily: "Alkhemikal",
                 }
             )
-            .setResolution(8)
+            .setResolution(2)
             .setOrigin(0, 1)
             .setRotation(Math.PI / 2);
 
         const attackTextMask = this.add
 
             .rectangle(
-                this.defenseField.x + this.defenseField.width,
-                this.defenseField.y,
+                this.attackField.x + this.attackField.width,
+                this.attackField.y,
                 40,
-                this.defenseField.height
+                this.attackField.height
             )
             .setOrigin(0, 0)
             .setFillStyle(0x000000)
@@ -131,11 +132,56 @@ export class Play extends Phaser.Scene {
 
         this.add.tween({
             targets: attackText,
-            y: this.defenseField.y,
+            y: this.attackField.y,
             duration: 6000,
             repeat: -1,
         });
 
+        // CREST
+
+        this.add.sprite(50, 570, "crest").setDisplaySize(60, 100);
+
+        this.add
+            .text(90, 520, "House Toadsworth of Lyria")
+            .setColor("#ffffff")
+            .setFontSize(14)
+            .setFontFamily("Alkhemikal")
+            .setAlign("left")
+            .setResolution(4)
+            .setOrigin(0, 0);
+
+        this.add
+            .text(120, 540, "164 Gold")
+            .setColor("#D6B41D")
+            .setFontSize(32)
+            .setFontFamily("Alkhemikal")
+            .setAlign("right")
+            .setResolution(4)
+            .setOrigin(0, 0);
+
+        this.add
+            .text(120, 575, "033 Guts")
+            .setColor("#D61D4B")
+            .setFontSize(32)
+            .setFontFamily("Alkhemikal")
+            .setAlign("right")
+            .setResolution(4)
+            .setOrigin(0, 0);
+
+        // Battlefields
+
+        this.physics.world.setBounds(
+            this.attackField.x,
+            this.attackField.y,
+            this.attackField.width,
+            this.attackField.height
+        );
+
+        new Battlefield(this);
+
+        // CARDS
+
+        
         this.cards = [
             createCard({
                 scene: this,
@@ -170,37 +216,6 @@ export class Play extends Phaser.Scene {
         ];
 
         this.arrangeCards();
-
-        // CREST
-
-        this.add.sprite(50, 570, "crest").setDisplaySize(60, 100);
-
-        this.add
-            .text(90, 520, "House Toadsworth of Lyria")
-            .setColor("#ffffff")
-            .setFontSize(14)
-            .setFontFamily("Alkhemikal")
-            .setAlign("left")
-            .setResolution(8)
-            .setOrigin(0, 0);
-
-        this.add
-            .text(120, 540, "164 Gold")
-            .setColor("#D6B41D")
-            .setFontSize(32)
-            .setFontFamily("Alkhemikal")
-            .setAlign("right")
-            .setResolution(8)
-            .setOrigin(0, 0);
-
-        this.add
-            .text(120, 575, "033 Guts")
-            .setColor("#D61D4B")
-            .setFontSize(32)
-            .setFontFamily("Alkhemikal")
-            .setAlign("right")
-            .setResolution(8)
-            .setOrigin(0, 0);
     }
 
     arrangeCards() {
@@ -222,13 +237,17 @@ export class Play extends Phaser.Scene {
 
             let shimmyOver = 0;
 
-            if (this.hoveredCardIndex != -1 && this.hoveredCardIndex !== index) {
-                shimmyOver = this.hoveredCardIndex < index ? SHIMMY_OVER : -SHIMMY_OVER;
+            if (
+                this.hoveredCardIndex != -1 &&
+                this.hoveredCardIndex !== index
+            ) {
+                shimmyOver =
+                    this.hoveredCardIndex < index ? SHIMMY_OVER : -SHIMMY_OVER;
             }
 
             const x = ARC_CENTER.x + Math.sin(angle) * arcRadius + shimmyOver;
             const y = ARC_CENTER.y - Math.cos(angle) * arcRadius;
-            
+
             control.x = x;
             control.y = y;
             control.cardIndex = index;
