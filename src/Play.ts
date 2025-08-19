@@ -2,7 +2,10 @@ import { createCard } from "./createCard";
 import Phaser from "phaser";
 
 export class Play extends Phaser.Scene {
-    cards = [];
+    cards: {
+        gameObject: Phaser.GameObjects.Container;
+        control: { x: number; y: number };
+    }[] = [];
 
     // Grid configuration
     attackField = {
@@ -50,8 +53,8 @@ export class Play extends Phaser.Scene {
             20,
             20
         );
-        defenseGrid.setFillStyle(0xE0BFA7);
-        defenseGrid.setAltFillStyle(0xD6B6A0);
+        defenseGrid.setFillStyle(0xe0bfa7);
+        defenseGrid.setAltFillStyle(0xd6b6a0);
         defenseGrid.setOutlineStyle();
 
         // const rec = this.add.rectangle(100, 500, 100, 160)
@@ -136,8 +139,58 @@ export class Play extends Phaser.Scene {
             createCard({
                 scene: this,
                 x: 100,
-                y: 500,
+                y: 540,
+            }),
+            createCard({
+                scene: this,
+                x: 150,
+                y: 540,
+            }),
+            createCard({
+                scene: this,
+                x: 200,
+                y: 540,
+            }),
+            createCard({
+                scene: this,
+                x: 150,
+                y: 540,
+            }),
+            createCard({
+                scene: this,
+                x: 200,
+                y: 540,
             }),
         ];
+
+        this.arrangeCards();
+    }
+
+    arrangeCards() {
+        const cardCount = this.cards.length;
+        const middle = (cardCount - 1) / 2;
+
+        
+        const arcDeg = Math.PI * (3.5 / 180);
+        const arcRadius = 1600;
+
+        const arcCenter = {
+            x: this.scene.systems.scale.width / 2,
+            y: 540 + arcRadius,
+        }
+
+        this.cards.forEach(({ control, gameObject }, index) => {
+            const angle = (index - middle) * arcDeg;
+            const x = arcCenter.x + Math.sin(angle) * arcRadius;
+            const y = arcCenter.y - Math.cos(angle) * arcRadius;
+
+            console.log(angle, Math.sin(angle) * arcRadius, Math.cos(angle) * arcRadius);
+
+            control.x = x;
+            control.y = y;
+
+            gameObject.setPosition(x, y);
+            gameObject.setRotation(angle);
+        });
     }
 }

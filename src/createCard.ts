@@ -4,27 +4,27 @@ type CardParams = {
     scene: Phaser.Scene;
     x: number;
     y: number;
-    cardName: string;
-    cardImage: string;
-    cardDescription: string;
+    cardName?: string;
+    cardImage?: string;
+    cardDescription?: string;
 };
 
 export const createCard = ({
     scene,
     x,
     y,
-    cardName,
-    cardImage,
-    cardDescription,
+    cardName = "All Is Dust",
+    cardImage = "card-guy",
+    cardDescription = "Each player sacrifices all permanents they control that are one or more colors.",
 }: CardParams) => {
     let isRaised = false;
 
     // const backTexture = "card-back";
 
-    cardName = "All Is Dust";
-    cardImage = "card-guy";
-    cardDescription =
-        "Each player sacrifices all permanents they control that are one or more colors.";
+    const CONTROL = {
+        x: x,
+        y: y
+    }
 
     const cardWidth = 120;
     const cardHeight = 160;
@@ -39,6 +39,7 @@ export const createCard = ({
     const card = scene.add
         .rectangle(0, 0, cardWidth, cardHeight)
         .setFillStyle(0xbbbbbb)
+        .setStrokeStyle(1, 0x444444, 1)
         .setName(cardName)
         .setInteractive();
 
@@ -79,9 +80,11 @@ export const createCard = ({
 
         isRaised = true;
 
+        console.log(CONTROL.y);
+
         scene.add.tween({
             targets: cardGroup,
-            y: y - cardHeight * 0.25,
+            y: CONTROL.y - cardHeight * 0.25,
             scale: 1.5,
             duration: 100,
             ease: "Power2.easeInOut",
@@ -93,7 +96,7 @@ export const createCard = ({
         isRaised = false;
         scene.add.tween({
             targets: cardGroup,
-            y: y,
+            y: CONTROL.y,
             scale: 1,
             duration: 100,
             ease: "Power2.easeInOut",
@@ -112,5 +115,6 @@ export const createCard = ({
 
     return {
         gameObject: cardGroup,
+        control: CONTROL,
     };
 };
