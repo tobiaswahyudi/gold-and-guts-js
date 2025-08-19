@@ -8,6 +8,8 @@ type CardParams = {
     cardImage?: string;
     cardDescription?: string;
     cardTarget?: "attack" | "defense";
+    cardIndex?: number;
+    selectCard: (cardIndex: number) => void;
 };
 
 export const createCard = ({
@@ -18,6 +20,8 @@ export const createCard = ({
     cardImage = "card-guy",
     cardDescription = "Each player sacrifices all permanents they control that are one or more colors.",
     cardTarget = Math.random() > 0.5 ? "attack" : "defense",
+    cardIndex = 0,
+    selectCard,
 }: CardParams) => {
     let isRaised = false;
 
@@ -26,6 +30,7 @@ export const createCard = ({
     const CONTROL = {
         x: x,
         y: y,
+        cardIndex: cardIndex,
     };
 
     const colorHex = cardTarget === "attack" ? "#E0BFA7" : "#6f947f";
@@ -80,12 +85,10 @@ export const createCard = ({
             .setOrigin(0.5, 0)
     );
 
-    const raiseCard = () => {
+    const hoverCard = () => {
         if (isRaised) return;
 
         isRaised = true;
-
-        console.log(CONTROL.y);
 
         scene.add.tween({
             targets: cardGroup,
@@ -94,9 +97,11 @@ export const createCard = ({
             duration: 100,
             ease: "Power2.easeInOut",
         });
+
+        selectCard(CONTROL.cardIndex);
     };
 
-    const lowerCard = () => {
+    const unhoverCard = () => {
         if (!isRaised) return;
         isRaised = false;
         scene.add.tween({
@@ -106,15 +111,16 @@ export const createCard = ({
             duration: 100,
             ease: "Power2.easeInOut",
         });
+        selectCard(-1);
     };
 
     card.on(Phaser.Input.Events.POINTER_OVER, () => {
-        raiseCard();
+        hoverCard();
         scene.input.setDefaultCursor("pointer");
     });
 
     card.on(Phaser.Input.Events.POINTER_OUT, () => {
-        lowerCard();
+        unhoverCard();
         scene.input.setDefaultCursor("default");
     });
 

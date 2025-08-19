@@ -2,10 +2,9 @@ import { createCard } from "./createCard";
 import Phaser from "phaser";
 
 export class Play extends Phaser.Scene {
-    cards: {
-        gameObject: Phaser.GameObjects.Container;
-        control: { x: number; y: number };
-    }[] = [];
+    cards: ReturnType<typeof createCard>[] = [];
+
+    hoveredCardIndex = -1;
 
     // Grid configuration
     attackField = {
@@ -26,6 +25,11 @@ export class Play extends Phaser.Scene {
         super({
             key: "Play",
         });
+    }
+
+    hoverCard(cardIndex: number) {
+        this.hoveredCardIndex = cardIndex;
+        this.arrangeCards();
     }
 
     init() {
@@ -132,75 +136,36 @@ export class Play extends Phaser.Scene {
             repeat: -1,
         });
 
-        // const titleText = this.add
-        //     .text(
-        //         this.sys.game.scale.width / 2,
-        //         this.sys.game.scale.height / 2,
-        //         "Guts and Gold",
-        //         {
-        //             align: "center",
-        //             fontSize: 120,
-        //             fontStyle: "bold",
-        //             color: "#ffffff",
-        //             fontFamily: "Alkhemikal",
-        //         }
-        //     )
-        //     .setResolution(8)
-        //     .setOrigin(0.5)
-        //     .setDepth(3)
-        //     .setInteractive();
-
-        // titleText.on(Phaser.Input.Events.POINTER_OVER, () => {
-        //     titleText.setColor("#eeeeee");
-        //     this.input.setDefaultCursor("pointer");
-        // });
-        // titleText.on(Phaser.Input.Events.POINTER_OUT, () => {
-        //     titleText.setColor("#ffffff");
-        //     this.input.setDefaultCursor("default");
-        // });
-        // titleText.on(Phaser.Input.Events.POINTER_DOWN, () => {
-        //     this.sound.play("card-deal", { volume: 1.3 });
-        //     this.add.tween({
-        //         targets: titleText,
-        //         ease: Phaser.Math.Easing.Bounce.InOut,
-        //         y: -1000,
-        //         onComplete: () => {
-        //             if (!this.sound.get("theme-song")) {
-        //                 this.sound.play("theme-song", {
-        //                     loop: true,
-        //                     volume: 0.5,
-        //                 });
-        //             }
-        //             // this.startGame();
-        //         },
-        //     });
-        // });
-
         this.cards = [
             createCard({
                 scene: this,
                 x: 100,
                 y: 540,
+                selectCard: this.hoverCard.bind(this),
             }),
             createCard({
                 scene: this,
                 x: 150,
                 y: 540,
+                selectCard: this.hoverCard.bind(this),
             }),
             createCard({
                 scene: this,
                 x: 200,
                 y: 540,
+                selectCard: this.hoverCard.bind(this),
             }),
             createCard({
                 scene: this,
                 x: 150,
                 y: 540,
+                selectCard: this.hoverCard.bind(this),
             }),
             createCard({
                 scene: this,
                 x: 200,
                 y: 540,
+                selectCard: this.hoverCard.bind(this),
             }),
         ];
 
@@ -242,27 +207,31 @@ export class Play extends Phaser.Scene {
         const cardCount = this.cards.length;
         const middle = (cardCount - 1) / 2;
 
-        const arcDeg = Math.PI * (3.5 / 180);
-        const arcRadius = 1600;
+        const arcDeg = Math.PI * (3 / 180);
+        const arcRadius = 2000;
 
-        const arcCenter = {
+        const ARC_CENTER = {
             x: this.scene.systems.scale.width / 2,
             y: 540 + arcRadius,
         };
 
+        const SHIMMY_OVER = 40;
+
         this.cards.forEach(({ control, gameObject }, index) => {
             const angle = (index - middle) * arcDeg;
-            const x = arcCenter.x + Math.sin(angle) * arcRadius;
-            const y = arcCenter.y - Math.cos(angle) * arcRadius;
 
-            console.log(
-                angle,
-                Math.sin(angle) * arcRadius,
-                Math.cos(angle) * arcRadius
-            );
+            let shimmyOver = 0;
 
+            if (this.hoveredCardIndex != -1 && this.hoveredCardIndex !== index) {
+                shimmyOver = this.hoveredCardIndex < index ? SHIMMY_OVER : -SHIMMY_OVER;
+            }
+
+            const x = ARC_CENTER.x + Math.sin(angle) * arcRadius + shimmyOver;
+            const y = ARC_CENTER.y - Math.cos(angle) * arcRadius;
+            
             control.x = x;
             control.y = y;
+            control.cardIndex = index;
 
             gameObject.setPosition(x, y);
             gameObject.setRotation(angle);
