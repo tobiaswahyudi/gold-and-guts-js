@@ -161,7 +161,7 @@ export class Play extends Phaser.Scene {
 
         this.add
             .text(120, 575, "033 Guts")
-            .setColor("#D61D4B")
+            .setColor("#E8298F")
             .setFontSize(32)
             .setFontFamily("Alkhemikal")
             .setAlign("right")
