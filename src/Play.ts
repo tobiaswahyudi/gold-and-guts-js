@@ -6,6 +6,8 @@ export class Play extends Phaser.Scene {
     cards: ReturnType<typeof createCard>[] = [];
 
     hoveredCardIndex = -1;
+    draggedCardIndex = -1;
+    dragStartPosition = {x: 0, y: 0};
 
     // Grid configuration
     defenseField = {
@@ -29,7 +31,14 @@ export class Play extends Phaser.Scene {
     }
 
     hoverCard(cardIndex: number) {
+        if (this.draggedCardIndex !== -1) return false;
         this.hoveredCardIndex = cardIndex;
+        this.arrangeCards();
+        return true;
+    }
+
+    dragCard(cardIndex: number) {
+        this.draggedCardIndex = cardIndex;
         this.arrangeCards();
     }
 
@@ -216,6 +225,20 @@ export class Play extends Phaser.Scene {
         ];
 
         this.arrangeCards();
+
+
+        this.input.on('drag', (pointer: any, _gameObject: any, dragX: number, dragY: number) => {
+            this.dragCard(this.hoveredCardIndex);
+            const card = this.cards[this.draggedCardIndex].gameObject;
+            card.setX(pointer.x);
+            card.setY(pointer.y);
+            console.log(pointer);
+        });
+
+        this.input.on('dragend', () => {
+            this.draggedCardIndex = -1;
+            this.arrangeCards();
+        });
     }
 
     arrangeCards() {

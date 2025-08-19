@@ -9,7 +9,7 @@ type CardParams = {
     cardDescription?: string;
     cardTarget?: "attack" | "defense";
     cardIndex?: number;
-    selectCard: (cardIndex: number) => void;
+    selectCard: (cardIndex: number) => boolean;
 };
 
 export const createCard = ({
@@ -45,15 +45,14 @@ export const createCard = ({
 
     const cardGroup = scene.add
         .container(x, y)
-        .setSize(cardWidth, cardHeight)
-        .setInteractive();
+        .setSize(cardWidth, cardHeight);
 
     const card = scene.add
         .rectangle(0, 0, cardWidth, cardHeight)
         .setFillStyle(color.color)
         .setStrokeStyle(1, 0x444444, 1)
         .setName(cardName)
-        .setInteractive();
+        .setInteractive({draggable: true});
 
     cardGroup.add(card);
 
@@ -87,6 +86,9 @@ export const createCard = ({
 
     const hoverCard = () => {
         if (isRaised) return;
+        const ok = selectCard(CONTROL.cardIndex);
+
+        if (!ok) return;
 
         isRaised = true;
 
@@ -98,7 +100,6 @@ export const createCard = ({
             ease: "Power2.easeInOut",
         });
 
-        selectCard(CONTROL.cardIndex);
     };
 
     const unhoverCard = () => {
