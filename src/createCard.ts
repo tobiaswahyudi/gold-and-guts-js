@@ -1,3 +1,14 @@
+import Phaser from "phaser";
+
+type CardParams = {
+    scene: Phaser.Scene;
+    x: number;
+    y: number;
+    cardName: string;
+    cardImage: string;
+    cardDescription: string;
+};
+
 export const createCard = ({
     scene,
     x,
@@ -5,7 +16,7 @@ export const createCard = ({
     cardName,
     cardImage,
     cardDescription,
-}) => {
+}: CardParams) => {
     let isRaised = false;
 
     // const backTexture = "card-back";
