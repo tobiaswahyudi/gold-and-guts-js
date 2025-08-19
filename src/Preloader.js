@@ -19,6 +19,8 @@ export class Preloader extends Phaser.Scene {
         this.load.image("card-guy", "cards/card-0.png");
         this.load.image("heart", "ui/heart.png");
 
+        this.load.image("crest", "crest/toadsworth.png");
+
         this.load.font("Alkhemikal", "font/Alkhemikal.ttf");
     }
 

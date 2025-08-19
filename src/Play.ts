@@ -91,49 +91,49 @@ export class Play extends Phaser.Scene {
             .setOrigin(0, 1)
             .setRotation(Math.PI / 2);
 
-        const titleText = this.add
-            .text(
-                this.sys.game.scale.width / 2,
-                this.sys.game.scale.height / 2,
-                "Guts and Gold",
-                {
-                    align: "center",
-                    fontSize: 120,
-                    fontStyle: "bold",
-                    color: "#ffffff",
-                    fontFamily: "Alkhemikal",
-                }
-            )
-            .setResolution(8)
-            .setOrigin(0.5)
-            .setDepth(3)
-            .setInteractive();
+        // const titleText = this.add
+        //     .text(
+        //         this.sys.game.scale.width / 2,
+        //         this.sys.game.scale.height / 2,
+        //         "Guts and Gold",
+        //         {
+        //             align: "center",
+        //             fontSize: 120,
+        //             fontStyle: "bold",
+        //             color: "#ffffff",
+        //             fontFamily: "Alkhemikal",
+        //         }
+        //     )
+        //     .setResolution(8)
+        //     .setOrigin(0.5)
+        //     .setDepth(3)
+        //     .setInteractive();
 
-        titleText.on(Phaser.Input.Events.POINTER_OVER, () => {
-            titleText.setColor("#eeeeee");
-            this.input.setDefaultCursor("pointer");
-        });
-        titleText.on(Phaser.Input.Events.POINTER_OUT, () => {
-            titleText.setColor("#ffffff");
-            this.input.setDefaultCursor("default");
-        });
-        titleText.on(Phaser.Input.Events.POINTER_DOWN, () => {
-            this.sound.play("card-deal", { volume: 1.3 });
-            this.add.tween({
-                targets: titleText,
-                ease: Phaser.Math.Easing.Bounce.InOut,
-                y: -1000,
-                onComplete: () => {
-                    if (!this.sound.get("theme-song")) {
-                        this.sound.play("theme-song", {
-                            loop: true,
-                            volume: 0.5,
-                        });
-                    }
-                    // this.startGame();
-                },
-            });
-        });
+        // titleText.on(Phaser.Input.Events.POINTER_OVER, () => {
+        //     titleText.setColor("#eeeeee");
+        //     this.input.setDefaultCursor("pointer");
+        // });
+        // titleText.on(Phaser.Input.Events.POINTER_OUT, () => {
+        //     titleText.setColor("#ffffff");
+        //     this.input.setDefaultCursor("default");
+        // });
+        // titleText.on(Phaser.Input.Events.POINTER_DOWN, () => {
+        //     this.sound.play("card-deal", { volume: 1.3 });
+        //     this.add.tween({
+        //         targets: titleText,
+        //         ease: Phaser.Math.Easing.Bounce.InOut,
+        //         y: -1000,
+        //         onComplete: () => {
+        //             if (!this.sound.get("theme-song")) {
+        //                 this.sound.play("theme-song", {
+        //                     loop: true,
+        //                     volume: 0.5,
+        //                 });
+        //             }
+        //             // this.startGame();
+        //         },
+        //     });
+        // });
 
         this.cards = [
             createCard({
@@ -164,27 +164,61 @@ export class Play extends Phaser.Scene {
         ];
 
         this.arrangeCards();
+
+        // CREST
+
+        this.add.sprite(50, 570, "crest").setDisplaySize(60, 100);
+
+        this.add
+            .text(90, 520, "House Toadsworth of Lyria")
+            .setColor("#ffffff")
+            .setFontSize(14)
+            .setFontFamily("Alkhemikal")
+            .setAlign("left")
+            .setResolution(8)
+            .setOrigin(0, 0);
+
+        this.add
+            .text(120, 540, "164 Gold")
+            .setColor("#D6B41D")
+            .setFontSize(32)
+            .setFontFamily("Alkhemikal")
+            .setAlign("right")
+            .setResolution(8)
+            .setOrigin(0, 0);
+        
+        this.add
+            .text(120, 575, "033 Guts")
+            .setColor("#D61D4B")
+            .setFontSize(32)
+            .setFontFamily("Alkhemikal")
+            .setAlign("right")
+            .setResolution(8)
+            .setOrigin(0, 0);
     }
 
     arrangeCards() {
         const cardCount = this.cards.length;
         const middle = (cardCount - 1) / 2;
 
-        
         const arcDeg = Math.PI * (3.5 / 180);
         const arcRadius = 1600;
 
         const arcCenter = {
             x: this.scene.systems.scale.width / 2,
             y: 540 + arcRadius,
-        }
+        };
 
         this.cards.forEach(({ control, gameObject }, index) => {
             const angle = (index - middle) * arcDeg;
             const x = arcCenter.x + Math.sin(angle) * arcRadius;
             const y = arcCenter.y - Math.cos(angle) * arcRadius;
 
-            console.log(angle, Math.sin(angle) * arcRadius, Math.cos(angle) * arcRadius);
+            console.log(
+                angle,
+                Math.sin(angle) * arcRadius,
+                Math.cos(angle) * arcRadius
+            );
 
             control.x = x;
             control.y = y;
