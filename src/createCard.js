@@ -1,86 +1,99 @@
-/**
- * Create a card game object
- */
-export const createCard = ({ scene, x, y, frontTexture, cardName }) => {
-    let isFlipping = false;
-    const rotation = { y: 0 };
+export const createCard = ({
+    scene,
+    x,
+    y,
+    cardName,
+    cardImage,
+    cardDescription,
+}) => {
+    let isRaised = false;
 
-    const backTexture = "card-back";
+    // const backTexture = "card-back";
 
-    const card = scene.add
-        .plane(x, y, backTexture)
-        .setName(cardName)
-        .setInteractive();
+    cardName = "All Is Dust";
+    cardImage = "card-guy";
+    cardDescription =
+        "Each player sacrifices all permanents they control that are one or more colors.";
 
-    // start with the card face down
-    card.modelRotationY = 180;
+    const cardWidth = 120;
+    const cardHeight = 160;
 
-    const flipCard = (callbackComplete) => {
-        if (isFlipping) {
-            return;
-        }
+    const cardTextDelta = cardHeight * -0.5 + 10;
+
+    const cardGroup = scene.add.container(x, y).setSize(cardWidth, cardHeight).setInteractive();
+
+    const card = cardGroup.add(
+        scene.add
+            .rectangle(0, 0, cardWidth, cardHeight)
+            .setFillStyle(0xbbbbbb)
+            .setName(cardName)
+            .setInteractive()
+    );
+
+    cardGroup.add(
+        scene.add
+            .text(0, cardTextDelta, cardName)
+            .setColor("#ffffff")
+            .setFontSize(16)
+            .setFontFamily("Alkhemikal")
+            .setAlign("center")
+            .setResolution(8)
+            .setOrigin(0.5, 0)
+    );
+
+    const raiseCard = () => {
+        if (isRaised) return;
+
+        isRaised = true;
+
         scene.add.tween({
-            targets: [rotation],
-            y: rotation.y === 180 ? 0 : 180,
-            ease: Phaser.Math.Easing.Expo.Out,
-            duration: 500,
-            onStart: () => {
-                isFlipping = true;
-                scene.sound.play("card-flip");
-                scene.tweens.chain({
-                    targets: card,
-                    ease: Phaser.Math.Easing.Expo.InOut,
-                    tweens: [
-                        {
-                            duration: 200,
-                            scale: 1.1,
-                        },
-                        {
-                            duration: 300,
-                            scale: 1,
-                        },
-                    ],
-                });
-            },
-            onUpdate: () => {
-                // card.modelRotation.y = Phaser.Math.DegToRad(180) + Phaser.Math.DegToRad(rotation.y);
-                card.rotateY = 180 + rotation.y;
-                const cardRotation = Math.floor(card.rotateY) % 360;
-                if (
-                    (cardRotation >= 0 && cardRotation <= 90) ||
-                    (cardRotation >= 270 && cardRotation <= 359)
-                ) {
-                    card.setTexture(frontTexture);
-                } else {
-                    card.setTexture(backTexture);
-                }
-            },
-            onComplete: () => {
-                isFlipping = false;
-                if (callbackComplete) {
-                    callbackComplete();
-                }
-            },
+            targets: cardGroup,
+            y: y - cardHeight * 0.5,
+            scale: 1.2,
+            duration: 100,
+            ease: "Power2.easeInOut",
         });
+
+        // scene.add.tween({
+        //     targets: [cardText],
+        //     y: y + (cardTextDelta - (cardHeight * 0.5)) * 1.2,
+        //     scale: 1.2,
+        //     duration: 100,
+        //     ease: "Power2.easeInOut",
+        // });
     };
 
-    const destroy = () => {
+    const lowerCard = () => {
+        if (!isRaised) return;
+        isRaised = false;
         scene.add.tween({
-            targets: [card],
-            y: card.y - 1000,
-            easing: Phaser.Math.Easing.Elastic.In,
-            duration: 500,
-            onComplete: () => {
-                card.destroy();
-            },
+            targets: cardGroup,
+            y: y,
+            scale: 1,
+            duration: 100,
+            ease: "Power2.easeInOut",
         });
+
+        // scene.add.tween({
+        //     targets: [cardText],
+        //     y: y + cardTextDelta,
+        //     scale: 1,
+        //     duration: 100,
+        //     ease: "Power2.easeInOut",
+        // });
     };
+
+    cardGroup.on(Phaser.Input.Events.POINTER_OVER, () => {
+        raiseCard();
+        scene.input.setDefaultCursor("pointer");
+    });
+
+    cardGroup.on(Phaser.Input.Events.POINTER_OUT, () => {
+        lowerCard();
+        scene.input.setDefaultCursor("default");
+    });
 
     return {
-        gameObject: card,
-        flip: flipCard,
-        destroy,
-        cardName,
+        gameObject: cardGroup,
     };
 };
-

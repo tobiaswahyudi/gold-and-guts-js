@@ -2,6 +2,8 @@ import { createCard } from "./createCard";
 import Phaser from "phaser";
 
 export class Play extends Phaser.Scene {
+    cards = [];
+
     // Grid configuration
     attackField = {
         x: 100,
@@ -51,6 +53,8 @@ export class Play extends Phaser.Scene {
         defenseGrid.setFillStyle(0xE0BFA7);
         defenseGrid.setAltFillStyle(0xD6B6A0);
         defenseGrid.setOutlineStyle();
+
+        // const rec = this.add.rectangle(100, 500, 100, 160)
 
         this.add
             .text(
@@ -123,9 +127,17 @@ export class Play extends Phaser.Scene {
                             volume: 0.5,
                         });
                     }
-                    this.startGame();
+                    // this.startGame();
                 },
             });
         });
+
+        this.cards = [
+            createCard({
+                scene: this,
+                x: 100,
+                y: 500,
+            }),
+        ];
     }
 }
