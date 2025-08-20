@@ -3,11 +3,15 @@ import { Battlefield } from "./battlefield/battlefield";
 import Phaser from "phaser";
 
 export class Play extends Phaser.Scene {
+    graphics: Phaser.GameObjects.Graphics;
+
     cards: ReturnType<typeof createCard>[] = [];
 
     hoveredCardIndex = -1;
     draggedCardIndex = -1;
-    dragStartPosition = {x: 0, y: 0};
+    dragStartPosition = { x: 0, y: 0 };
+
+    dragArrow: Phaser.Curves.Curve | null = null;
 
     // Grid configuration
     defenseField = {
@@ -39,7 +43,6 @@ export class Play extends Phaser.Scene {
 
     dragCard(cardIndex: number) {
         this.draggedCardIndex = cardIndex;
-        this.arrangeCards();
     }
 
     init() {
@@ -47,6 +50,8 @@ export class Play extends Phaser.Scene {
     }
 
     create() {
+        this.graphics = this.add.graphics().setDepth(1000);
+
         const attackGrid = this.add.grid(
             this.defenseField.x + this.defenseField.width / 2,
             this.defenseField.y + this.defenseField.height / 2,
@@ -190,7 +195,6 @@ export class Play extends Phaser.Scene {
 
         // CARDS
 
-        
         this.cards = [
             createCard({
                 scene: this,
@@ -226,18 +230,38 @@ export class Play extends Phaser.Scene {
 
         this.arrangeCards();
 
+        this.input.on(
+            "drag",
+            (pointer: any, _gameObject: any, dragX: number, dragY: number) => {
+                this.dragCard(this.hoveredCardIndex);
+                const card = this.cards[this.draggedCardIndex].gameObject;
 
-        this.input.on('drag', (pointer: any, _gameObject: any, dragX: number, dragY: number) => {
-            this.dragCard(this.hoveredCardIndex);
-            const card = this.cards[this.draggedCardIndex].gameObject;
-            card.setX(pointer.x);
-            card.setY(pointer.y);
-            console.log(pointer);
-        });
+                const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
+                const arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
 
-        this.input.on('dragend', () => {
+                const dragDistance = arrowHead.distance(arrowTail);
+
+                const controlPointDistance = Math.min(
+                    (dragDistance * dragDistance) / 150,
+                    150
+                );
+                const controlPoint = new Phaser.Math.Vector2(
+                    0,
+                    -controlPointDistance
+                );
+
+                this.dragArrow = new Phaser.Curves.QuadraticBezier(
+                    arrowTail,
+                    arrowTail.clone().add(controlPoint),
+                    arrowHead
+                );
+            }
+        );
+
+        this.input.on("dragend", () => {
             this.draggedCardIndex = -1;
             this.arrangeCards();
+            this.dragArrow = null;
         });
     }
 
@@ -278,5 +302,29 @@ export class Play extends Phaser.Scene {
             gameObject.setPosition(x, y);
             gameObject.setRotation(angle);
         });
+    }
+
+    update() {
+        this.graphics.clear();
+        if (this.dragArrow) {
+            const ARROW_THICKNESS = 8;
+
+            this.graphics.lineStyle(ARROW_THICKNESS, 0x594a3e, 1);
+            this.dragArrow.draw(this.graphics);
+
+            const tangentHead = this.dragArrow
+                .getTangentAt(1)
+                .scale(ARROW_THICKNESS * 3);
+            const head = this.dragArrow.getPointAt(1);
+
+            new Phaser.Curves.Line(
+                head,
+                head.clone().add(tangentHead.rotate(Math.PI * 0.85))
+            ).draw(this.graphics);
+            new Phaser.Curves.Line(
+                head,
+                head.clone().add(tangentHead.rotate(Math.PI * 0.3))
+            ).draw(this.graphics);
+        }
     }
 }

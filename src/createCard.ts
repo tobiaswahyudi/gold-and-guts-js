@@ -33,6 +33,8 @@ export const createCard = ({
         cardIndex: cardIndex,
     };
 
+    const CARD_SCALE = 1.3;
+
     const colorHex = cardTarget === "attack" ? "#E0BFA7" : "#6f947f";
     const color = Phaser.Display.Color.HexStringToColor(colorHex)
         .saturate(20)
@@ -45,7 +47,8 @@ export const createCard = ({
 
     const cardGroup = scene.add
         .container(x, y)
-        .setSize(cardWidth, cardHeight);
+        .setSize(cardWidth, cardHeight)
+        .setDepth(2000);
 
     const card = scene.add
         .rectangle(0, 0, cardWidth, cardHeight)
@@ -94,8 +97,8 @@ export const createCard = ({
 
         scene.add.tween({
             targets: cardGroup,
-            y: CONTROL.y - cardHeight * 0.25,
-            scale: 1.5,
+            y: CONTROL.y - cardHeight * (CARD_SCALE - 1) * 0.5,
+            scale: CARD_SCALE,
             duration: 100,
             ease: "Power2.easeInOut",
         });
