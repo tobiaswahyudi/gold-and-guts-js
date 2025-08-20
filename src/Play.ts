@@ -288,12 +288,32 @@ export class Play extends Phaser.Scene {
     }
 
     addCard() {
+
+        const cardTarget = Math.random() > 0.5 ? "attack" : "defense";
+        let cardName = "";
+        let cardImage = "";
+        let cardDescription = "";
+
+        if(cardTarget === "attack") {
+            cardName = "Minion A ×3";
+            cardImage = "💂‍♂️";
+            cardDescription = "Spawns 3 minions. They attack the enemy base. They are not very strong.";
+        } else {
+            cardName = "Tower A";
+            cardImage = "🏹";
+            cardDescription = "Builds a tower. It defends your base. It is not very strong.";
+        }
+
         this.cards.push(
             createCard({
                 scene: this,
                 x: 150,
                 y: 540,
                 selectCard: this.hoverCard.bind(this),
+                cardName,
+                cardImage,
+                cardDescription,
+                cardTarget,
             })
         );
     }

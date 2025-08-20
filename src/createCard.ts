@@ -17,7 +17,7 @@ export const createCard = ({
     x,
     y,
     cardName = "All Is Dust",
-    cardImage = "card-guy",
+    cardImage = "💀",
     cardDescription = "Each player sacrifices all permanents they control that are one or more colors.",
     cardTarget = Math.random() > 0.5 ? "attack" : "defense",
     cardIndex = 0,
@@ -34,12 +34,6 @@ export const createCard = ({
     };
 
     const CARD_SCALE = 1.3;
-
-    if (cardTarget === "attack") {
-        cardName = "Minion A ×3";
-    } else {
-        cardName = "Tower A";
-    }
 
     const colorHex = cardTarget === "attack" ? "#E0BFA7" : "#6f947f";
     const color = Phaser.Display.Color.HexStringToColor(colorHex)
@@ -71,7 +65,7 @@ export const createCard = ({
     cardGroup.add(
         scene.add
             .text(0, cardTextDelta, cardName)
-            .setColor("#ffffff")
+            .setColor("#222222")
             .setFontSize(16)
             .setFontFamily("Alkhemikal")
             .setAlign("center")
@@ -82,8 +76,17 @@ export const createCard = ({
     cardGroup.add(
         scene.add
             .rectangle(0, -20, cardWidth - 12, 72)
-            .setFillStyle(0xeeeeee)
-            .setStrokeStyle(1, 0xbbbbbb, 1)
+            .setFillStyle(color.darken(10).color)
+            .setStrokeStyle(1, color.darken(30).color, 1)
+    );
+
+    cardGroup.add(
+        scene.add
+            .text(0, -16, cardImage)
+            .setFontSize(48)
+            .setAlign("center")
+            .setResolution(8)
+            .setOrigin(0.5, 0.5)
     );
 
     cardGroup.add(
@@ -91,8 +94,8 @@ export const createCard = ({
             .text(0, 22, cardDescription, {
                 wordWrap: { width: cardWidth - 20 },
             })
-            .setColor("#ffffff")
-            .setFontSize(10)
+            .setColor("#222222")
+            .setFontSize(12)
             .setFontFamily("Alkhemikal")
             .setAlign("center")
             .setResolution(8)
