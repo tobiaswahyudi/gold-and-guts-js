@@ -168,14 +168,13 @@ export class Play extends Phaser.Scene {
             repeat: -1,
         });
 
-        this.physics.world.setBounds(
+        this.battlefield = new Battlefield(
+            this,
             this.ATTACK_FIELD.x,
             this.ATTACK_FIELD.y,
             this.ATTACK_FIELD.width,
             this.ATTACK_FIELD.height
         );
-
-        this.battlefield = new Battlefield(this);
     }
 
     setupResourcesUi() {
