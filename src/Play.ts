@@ -77,7 +77,7 @@ export class Play extends Phaser.Scene {
             .text(
                 this.defenseField.x,
                 this.defenseField.y + this.defenseField.height + 130,
-                "DEFEND DEFEND DEFEND DEFEND",
+                "DEFEND DEFEND DEFEND DEFEND DEFEND",
                 {
                     fontSize: 40,
                     fontStyle: "bold",
@@ -113,7 +113,7 @@ export class Play extends Phaser.Scene {
             .text(
                 this.attackField.x + this.attackField.width,
                 this.attackField.y - 136,
-                "ATTACK ATTACK ATTACK ATTACK",
+                "ATTACK ATTACK ATTACK ATTACK ATTACK",
                 {
                     fontSize: 39,
                     fontStyle: "bold",
