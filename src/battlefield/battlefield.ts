@@ -6,13 +6,17 @@ export class Battlefield {
     towers: Tower[];
     units: Minion[];
 
+    scene: Phaser.Scene;
+
     constructor(scene: Phaser.Scene) {
         this.towers = [];
         this.units = [];
 
+        this.scene = scene;
+
         // 400 colliding minions, without towers, still fit within 120fps.
         // 500 colliding minions drops significantly.
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 3; i++) {
             const minion = makeMinion(scene);
             this.units.push(minion);
             minion.setVelocity(
@@ -33,5 +37,16 @@ export class Battlefield {
         }
 
         scene.physics.add.collider(unitBodies, this.towers[0].gameObject.body as Phaser.Physics.Arcade.StaticBody);
+    }
+
+    spawnMinions() {
+        for (let i = 0; i < 3; i++) {
+            const minion = makeMinion(this.scene);
+            this.units.push(minion);
+            minion.setVelocity(
+                (Math.random() - 0.5) * 200,
+                (Math.random() - 0.5) * 200
+            );
+        }
     }
 }

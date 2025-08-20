@@ -11,17 +11,24 @@ export class Play extends Phaser.Scene {
     draggedCardIndex = -1;
     dragStartPosition = { x: 0, y: 0 };
 
+    isAttackFieldHovered = false;
+
+    attackField: Phaser.GameObjects.Grid;
+    defenseField: Phaser.GameObjects.Grid;
+
     dragArrow: Phaser.Curves.Curve | null = null;
 
+    battlefield: Battlefield;
+
     // Grid configuration
-    defenseField = {
+    DEFENSE_FIELD = {
         x: 100,
         y: 32,
         width: 400,
         height: 400,
     };
 
-    attackField = {
+    ATTACK_FIELD = {
         x: 524,
         y: 32,
         width: 400,
@@ -55,37 +62,43 @@ export class Play extends Phaser.Scene {
         this.setupBattlefields();
         this.setupResourcesUi();
         this.setupCards();
+
+        this.setupListeners();
     }
 
     setupBattlefields() {
-        const attackGrid = this.add.grid(
-            this.defenseField.x + this.defenseField.width / 2,
-            this.defenseField.y + this.defenseField.height / 2,
-            this.defenseField.width,
-            this.defenseField.height,
-            20,
-            20
-        );
-        attackGrid.setFillStyle(0x6f947f);
-        attackGrid.setAltFillStyle(0x698c78);
-        attackGrid.setOutlineStyle();
+        this.defenseField = this.add
+            .grid(
+                this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width / 2,
+                this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height / 2,
+                this.DEFENSE_FIELD.width,
+                this.DEFENSE_FIELD.height,
+                20,
+                20
+            )
+            .setFillStyle(0x6f947f)
+            .setAltFillStyle(0x698c78)
+            .setOutlineStyle()
+            .setInteractive();
 
-        const defenseGrid = this.add.grid(
-            this.attackField.x + this.attackField.width / 2,
-            this.attackField.y + this.attackField.height / 2,
-            this.attackField.width,
-            this.attackField.height,
-            20,
-            20
-        );
-        defenseGrid.setFillStyle(0xe0bfa7);
-        defenseGrid.setAltFillStyle(0xd6b6a0);
-        defenseGrid.setOutlineStyle();
+        this.attackField = this.add
+            .grid(
+                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
+                this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2,
+                this.ATTACK_FIELD.width,
+                this.ATTACK_FIELD.height,
+                20,
+                20
+            )
+            .setFillStyle(0xe0bfa7)
+            .setAltFillStyle(0xd6b6a0)
+            .setOutlineStyle()
+            .setInteractive();
 
         const defendText = this.add
             .text(
-                this.defenseField.x,
-                this.defenseField.y + this.defenseField.height + 130,
+                this.DEFENSE_FIELD.x,
+                this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height + 130,
                 "DEFEND DEFEND DEFEND DEFEND DEFEND",
                 {
                     fontSize: 40,
@@ -100,10 +113,10 @@ export class Play extends Phaser.Scene {
 
         const defendTextMask = this.add
             .rectangle(
-                this.defenseField.x,
-                this.defenseField.y,
+                this.DEFENSE_FIELD.x,
+                this.DEFENSE_FIELD.y,
                 40,
-                this.defenseField.height
+                this.DEFENSE_FIELD.height
             )
             .setOrigin(1, 0)
             .setFillStyle(0x000000)
@@ -113,15 +126,15 @@ export class Play extends Phaser.Scene {
 
         this.add.tween({
             targets: defendText,
-            y: this.defenseField.y + this.defenseField.height,
+            y: this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height,
             duration: 6000,
             repeat: -1,
         });
 
         const attackText = this.add
             .text(
-                this.attackField.x + this.attackField.width,
-                this.attackField.y - 136,
+                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
+                this.ATTACK_FIELD.y - 136,
                 "ATTACK ATTACK ATTACK ATTACK ATTACK",
                 {
                     fontSize: 39,
@@ -137,10 +150,10 @@ export class Play extends Phaser.Scene {
         const attackTextMask = this.add
 
             .rectangle(
-                this.attackField.x + this.attackField.width,
-                this.attackField.y,
+                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
+                this.ATTACK_FIELD.y,
                 40,
-                this.attackField.height
+                this.ATTACK_FIELD.height
             )
             .setOrigin(0, 0)
             .setFillStyle(0x000000)
@@ -150,19 +163,19 @@ export class Play extends Phaser.Scene {
 
         this.add.tween({
             targets: attackText,
-            y: this.attackField.y,
+            y: this.ATTACK_FIELD.y,
             duration: 6000,
             repeat: -1,
         });
 
         this.physics.world.setBounds(
-            this.attackField.x,
-            this.attackField.y,
-            this.attackField.width,
-            this.attackField.height
+            this.ATTACK_FIELD.x,
+            this.ATTACK_FIELD.y,
+            this.ATTACK_FIELD.width,
+            this.ATTACK_FIELD.height
         );
 
-        new Battlefield(this);
+        this.battlefield = new Battlefield(this);
     }
 
     setupResourcesUi() {
@@ -234,8 +247,6 @@ export class Play extends Phaser.Scene {
         ];
 
         this.arrangeCards();
-
-        this.setupCardDrag();
     }
 
     handleCardDrag(
@@ -248,7 +259,12 @@ export class Play extends Phaser.Scene {
         const card = this.cards[this.draggedCardIndex].gameObject;
 
         const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
-        const arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
+        const arrowHead = this.isAttackFieldHovered
+            ? new Phaser.Math.Vector2(
+                  this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
+                  this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2
+              )
+            : new Phaser.Math.Vector2(pointer.x, pointer.y);
 
         const dragDistance = arrowHead.distance(arrowTail);
 
@@ -266,14 +282,31 @@ export class Play extends Phaser.Scene {
     }
 
     handleCardDragEnd() {
+        if (this.draggedCardIndex === -1) return;
+        const card = this.cards[this.draggedCardIndex].gameObject;
+
+        const isAttackFieldCard = card.getData("cardTarget") === "attack";
+
+        if (isAttackFieldCard && this.isAttackFieldHovered) {
+            this.battlefield.spawnMinions();
+        }
+
         this.draggedCardIndex = -1;
         this.arrangeCards();
         this.dragArrow = null;
     }
 
-    setupCardDrag() {
+    setupListeners() {
         this.input.on("drag", this.handleCardDrag.bind(this));
         this.input.on("dragend", this.handleCardDragEnd.bind(this));
+
+        this.attackField.on("pointerover", () => {
+            this.isAttackFieldHovered = true;
+            console.log("attack field hovered");
+        });
+        this.attackField.on("pointerout", () => {
+            this.isAttackFieldHovered = false;
+        });
     }
 
     arrangeCards() {
@@ -341,56 +374,71 @@ export class Play extends Phaser.Scene {
 
             const card = this.cards[this.draggedCardIndex].gameObject;
 
-            const polygonPoints =
-                card.getData("cardTarget") === "attack"
-                    ? [
-                          0,
-                          0,
-                          this.attackField.x,
-                          0,
-                          this.attackField.x,
-                          this.attackField.y + this.attackField.height,
-                          this.attackField.x + this.attackField.width,
-                          this.attackField.y + this.attackField.height,
-                          this.attackField.x + this.attackField.width,
-                          this.attackField.y,
-                          this.attackField.x,
-                          this.attackField.y,
-                          this.attackField.x,
-                          0,
-                          this.scene.systems.scale.width,
-                          0,
-                          this.scene.systems.scale.width,
-                          this.scene.systems.scale.height,
-                          0,
-                          this.scene.systems.scale.height,
-                      ]
-                    : [
-                          0,
-                          0,
-                          this.defenseField.x,
-                          0,
-                          this.defenseField.x,
-                          this.defenseField.y + this.defenseField.height,
-                          this.defenseField.x + this.defenseField.width,
-                          this.defenseField.y + this.defenseField.height,
-                          this.defenseField.x + this.defenseField.width,
-                          this.defenseField.y,
-                          this.defenseField.x,
-                          this.defenseField.y,
-                          this.defenseField.x,
-                          0,
-                          this.scene.systems.scale.width,
-                          0,
-                          this.scene.systems.scale.width,
-                          this.scene.systems.scale.height,
-                          0,
-                          this.scene.systems.scale.height,
-                      ];
+            const isAttackFieldCard = card.getData("cardTarget") === "attack";
+
+            const polygonPoints = isAttackFieldCard
+                ? [
+                      0,
+                      0,
+                      this.ATTACK_FIELD.x,
+                      0,
+                      this.ATTACK_FIELD.x,
+                      this.ATTACK_FIELD.y + this.ATTACK_FIELD.height,
+                      this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
+                      this.ATTACK_FIELD.y + this.ATTACK_FIELD.height,
+                      this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
+                      this.ATTACK_FIELD.y,
+                      this.ATTACK_FIELD.x,
+                      this.ATTACK_FIELD.y,
+                      this.ATTACK_FIELD.x,
+                      0,
+                      this.scene.systems.scale.width,
+                      0,
+                      this.scene.systems.scale.width,
+                      this.scene.systems.scale.height,
+                      0,
+                      this.scene.systems.scale.height,
+                  ]
+                : [
+                      0,
+                      0,
+                      this.DEFENSE_FIELD.x,
+                      0,
+                      this.DEFENSE_FIELD.x,
+                      this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height,
+                      this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width,
+                      this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height,
+                      this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width,
+                      this.DEFENSE_FIELD.y,
+                      this.DEFENSE_FIELD.x,
+                      this.DEFENSE_FIELD.y,
+                      this.DEFENSE_FIELD.x,
+                      0,
+                      this.scene.systems.scale.width,
+                      0,
+                      this.scene.systems.scale.width,
+                      this.scene.systems.scale.height,
+                      0,
+                      this.scene.systems.scale.height,
+                  ];
 
             const polygonMask = new Phaser.Geom.Polygon(polygonPoints);
-            this.graphics.fillStyle(0x000000, 0.5);
+            this.graphics.fillStyle(0x000000, 0.4);
             this.graphics.fillPoints(polygonMask.points, true, true);
+
+            if (isAttackFieldCard) {
+                if (this.isAttackFieldHovered) {
+                    this.graphics.fillStyle(0xffffff, 0.2);
+                    this.graphics.fillRectShape(
+                        new Phaser.Geom.Rectangle(
+                            this.ATTACK_FIELD.x,
+                            this.ATTACK_FIELD.y,
+                            this.ATTACK_FIELD.width,
+                            this.ATTACK_FIELD.height
+                        )
+                    );
+                }
+            }
         }
     }
 }
