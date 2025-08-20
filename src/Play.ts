@@ -164,23 +164,26 @@ export class Play extends Phaser.Scene {
             .setResolution(4)
             .setOrigin(0, 0);
 
+        this.add.sprite(104, 556, "gold").setDisplaySize(32, 32);
+        this.add.sprite(104, 591, "guts").setDisplaySize(32, 32);
+
         this.add
-            .text(120, 540, "164 Gold")
+            .text(124, 556, "164 Gold")
             .setColor("#D6B41D")
             .setFontSize(32)
             .setFontFamily("Alkhemikal")
             .setAlign("right")
             .setResolution(4)
-            .setOrigin(0, 0);
+            .setOrigin(0, 0.5);
 
         this.add
-            .text(120, 575, "033 Guts")
+            .text(124, 591, "033 Guts")
             .setColor("#E8298F")
             .setFontSize(32)
             .setFontFamily("Alkhemikal")
             .setAlign("right")
             .setResolution(4)
-            .setOrigin(0, 0);
+            .setOrigin(0, 0.5);
 
         // Battlefields
 

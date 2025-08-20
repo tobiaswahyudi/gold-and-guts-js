@@ -17,7 +17,8 @@ export class Preloader extends Phaser.Scene {
         this.load.image("background");
         this.load.image("card-back", "cards/card-back.png");
         this.load.image("card-guy", "cards/card-0.png");
-        this.load.image("heart", "ui/heart.png");
+        this.load.image("gold", "ui/gold.png");
+        this.load.image("guts", "ui/guts.png");
 
         this.load.image("crest", "crest/toadsworth.png");
 
