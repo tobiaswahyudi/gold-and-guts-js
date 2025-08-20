@@ -415,6 +415,10 @@ export class Play extends Phaser.Scene {
 
     update() {
         this.graphics.clear();
+
+        this.defenseBattlefield.update();
+        this.attackBattlefield.update();
+
         if (this.dragArrow) {
             const ARROW_THICKNESS = 8;
 

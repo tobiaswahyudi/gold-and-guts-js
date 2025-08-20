@@ -5,15 +5,17 @@ export type TowerIcon = {
     rotationOffset: number;
 }
 
-export const makeTower = (scene: Phaser.Scene, x: number, y: number, icon: TowerIcon, fieldX: number, fieldY: number) => {
+export const makeTower = (scene: Phaser.Scene, x: number, y: number, icon: TowerIcon, fieldX: number, fieldY: number, range: number) => {
     // x and y represent grid position. Mult with the square size.
     // THIS SHOULD BE EXTRACTED INTO CONSTANTS, ALONG WITH THE GRID SIZE IN Play.ts
     x = (x + 0.5) * 20 + fieldX;
     y = (y + 0.5) * 20 + fieldY;
-
+    
     const group = scene.add.container(x, y).setSize(20, 20);
     const rect = scene.add.rectangle(0, 0, 17, 17, 0x222222, 1);
     const text = scene.add.text(0, 0, icon.icon).setFontSize(40).setAlign("center").setDisplayOrigin(19, 19).setScale(0.4);
+
+    group.add(scene.add.circle(0, 0, range, 0x222222, 0.1));
 
     scene.physics.add.existing(group, true);
 
@@ -51,12 +53,14 @@ export const makeTower = (scene: Phaser.Scene, x: number, y: number, icon: Tower
 
     const stopTracking = () => {
         targetObject = null;
-        scene.events.off('postupdate', updateRotation);
     };
 
     return {
         gameObject: group,
         setLookAt,
         stopTracking,
+        range,
+        lastFired: 0,
+        fireDelayTime: 800,
     };
 };
