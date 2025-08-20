@@ -336,6 +336,61 @@ export class Play extends Phaser.Scene {
                 head,
                 head.clone().add(tangentHead.rotate(Math.PI * 0.3))
             ).draw(this.graphics);
+
+            // should also have card
+
+            const card = this.cards[this.draggedCardIndex].gameObject;
+
+            const polygonPoints =
+                card.getData("cardTarget") === "attack"
+                    ? [
+                          0,
+                          0,
+                          this.attackField.x,
+                          0,
+                          this.attackField.x,
+                          this.attackField.y + this.attackField.height,
+                          this.attackField.x + this.attackField.width,
+                          this.attackField.y + this.attackField.height,
+                          this.attackField.x + this.attackField.width,
+                          this.attackField.y,
+                          this.attackField.x,
+                          this.attackField.y,
+                          this.attackField.x,
+                          0,
+                          this.scene.systems.scale.width,
+                          0,
+                          this.scene.systems.scale.width,
+                          this.scene.systems.scale.height,
+                          0,
+                          this.scene.systems.scale.height,
+                      ]
+                    : [
+                          0,
+                          0,
+                          this.defenseField.x,
+                          0,
+                          this.defenseField.x,
+                          this.defenseField.y + this.defenseField.height,
+                          this.defenseField.x + this.defenseField.width,
+                          this.defenseField.y + this.defenseField.height,
+                          this.defenseField.x + this.defenseField.width,
+                          this.defenseField.y,
+                          this.defenseField.x,
+                          this.defenseField.y,
+                          this.defenseField.x,
+                          0,
+                          this.scene.systems.scale.width,
+                          0,
+                          this.scene.systems.scale.width,
+                          this.scene.systems.scale.height,
+                          0,
+                          this.scene.systems.scale.height,
+                      ];
+
+            const polygonMask = new Phaser.Geom.Polygon(polygonPoints);
+            this.graphics.fillStyle(0x000000, 0.5);
+            this.graphics.fillPoints(polygonMask.points, true, true);
         }
     }
 }

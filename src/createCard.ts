@@ -50,6 +50,9 @@ export const createCard = ({
         .setSize(cardWidth, cardHeight)
         .setDepth(2000);
 
+    cardGroup.setData("cardTarget", cardTarget);
+    cardGroup.setData("cardIndex", cardIndex);
+
     const card = scene.add
         .rectangle(0, 0, cardWidth, cardHeight)
         .setFillStyle(color.color)
