@@ -2,6 +2,12 @@ import { createCard } from "./createCard";
 import { Battlefield } from "./battlefield/battlefield";
 import Phaser from "phaser";
 import { Card } from "./createCard";
+import {
+    ATTACK_FIELD_CONFIG,
+    ATTACK_FIELD_DISPLAY,
+    DEFENSE_FIELD_CONFIG,
+    DEFENSE_FIELD_DISPLAY,
+} from "./battlefield/constants";
 
 export class Play extends Phaser.Scene {
     graphics: Phaser.GameObjects.Graphics;
@@ -14,7 +20,7 @@ export class Play extends Phaser.Scene {
     dragStartPosition = { x: 0, y: 0 };
 
     isAttackFieldHovered = false;
-    defenseFieldHoveredTile: {x: number, y: number} | null = null;
+    defenseFieldHoveredTile: { x: number; y: number } | null = null;
 
     attackField: Phaser.GameObjects.Grid;
     defenseField: Phaser.GameObjects.Grid;
@@ -23,21 +29,6 @@ export class Play extends Phaser.Scene {
 
     attackBattlefield: Battlefield;
     defenseBattlefield: Battlefield;
-
-    // Grid configuration
-    DEFENSE_FIELD = {
-        x: 100,
-        y: 32,
-        width: 400,
-        height: 400,
-    };
-
-    ATTACK_FIELD = {
-        x: 524,
-        y: 32,
-        width: 400,
-        height: 400,
-    };
 
     constructor() {
         super({
@@ -73,12 +64,12 @@ export class Play extends Phaser.Scene {
     setupBattlefields() {
         this.defenseField = this.add
             .grid(
-                this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width / 2,
-                this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height / 2,
-                this.DEFENSE_FIELD.width,
-                this.DEFENSE_FIELD.height,
-                20,
-                20
+                DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width / 2,
+                DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height / 2,
+                DEFENSE_FIELD_CONFIG.width,
+                DEFENSE_FIELD_CONFIG.height,
+                DEFENSE_FIELD_CONFIG.squareSize,
+                DEFENSE_FIELD_CONFIG.squareSize
             )
             .setFillStyle(0x6f947f)
             .setAltFillStyle(0x698c78)
@@ -87,12 +78,12 @@ export class Play extends Phaser.Scene {
 
         this.attackField = this.add
             .grid(
-                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
-                this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2,
-                this.ATTACK_FIELD.width,
-                this.ATTACK_FIELD.height,
-                20,
-                20
+                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width / 2,
+                ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height / 2,
+                ATTACK_FIELD_CONFIG.width,
+                ATTACK_FIELD_CONFIG.height,
+                ATTACK_FIELD_CONFIG.squareSize,
+                ATTACK_FIELD_CONFIG.squareSize
             )
             .setFillStyle(0xe0bfa7)
             .setAltFillStyle(0xd6b6a0)
@@ -101,8 +92,8 @@ export class Play extends Phaser.Scene {
 
         const defendText = this.add
             .text(
-                this.DEFENSE_FIELD.x,
-                this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height + 130,
+                DEFENSE_FIELD_CONFIG.x,
+                DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height + 130,
                 "DEFEND DEFEND DEFEND DEFEND DEFEND",
                 {
                     fontSize: 40,
@@ -117,10 +108,10 @@ export class Play extends Phaser.Scene {
 
         const defendTextMask = this.add
             .rectangle(
-                this.DEFENSE_FIELD.x,
-                this.DEFENSE_FIELD.y,
+                DEFENSE_FIELD_CONFIG.x,
+                DEFENSE_FIELD_CONFIG.y,
                 40,
-                this.DEFENSE_FIELD.height
+                DEFENSE_FIELD_CONFIG.height
             )
             .setOrigin(1, 0)
             .setFillStyle(0x000000)
@@ -130,15 +121,15 @@ export class Play extends Phaser.Scene {
 
         this.add.tween({
             targets: defendText,
-            y: this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height,
+            y: DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
             duration: 6000,
             repeat: -1,
         });
 
         const attackText = this.add
             .text(
-                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
-                this.ATTACK_FIELD.y - 136,
+                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
+                ATTACK_FIELD_CONFIG.y - 136,
                 "ATTACK ATTACK ATTACK ATTACK ATTACK",
                 {
                     fontSize: 39,
@@ -154,10 +145,10 @@ export class Play extends Phaser.Scene {
         const attackTextMask = this.add
 
             .rectangle(
-                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
-                this.ATTACK_FIELD.y,
+                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
+                ATTACK_FIELD_CONFIG.y,
                 40,
-                this.ATTACK_FIELD.height
+                ATTACK_FIELD_CONFIG.height
             )
             .setOrigin(0, 0)
             .setFillStyle(0x000000)
@@ -167,39 +158,21 @@ export class Play extends Phaser.Scene {
 
         this.add.tween({
             targets: attackText,
-            y: this.ATTACK_FIELD.y,
+            y: ATTACK_FIELD_CONFIG.y,
             duration: 6000,
             repeat: -1,
         });
 
         this.attackBattlefield = new Battlefield(
             this,
-            this.ATTACK_FIELD.x,
-            this.ATTACK_FIELD.y,
-            this.ATTACK_FIELD.width,
-            this.ATTACK_FIELD.height,
-            {
-                minionIcon: "💂‍♂️",
-                towerIcon: {
-                    icon: "🔱",
-                    rotationOffset: Math.PI / 2,
-                },
-            }
+            ATTACK_FIELD_CONFIG,
+            ATTACK_FIELD_DISPLAY
         );
 
         this.defenseBattlefield = new Battlefield(
             this,
-            this.DEFENSE_FIELD.x,
-            this.DEFENSE_FIELD.y,
-            this.DEFENSE_FIELD.width,
-            this.DEFENSE_FIELD.height,
-            {
-                minionIcon: "👿",
-                towerIcon: {
-                    icon: "🏹",
-                    rotationOffset: Math.PI / 4,
-                },
-            }
+            DEFENSE_FIELD_CONFIG,
+            DEFENSE_FIELD_DISPLAY
         );
     }
 
@@ -257,27 +230,26 @@ export class Play extends Phaser.Scene {
         const card = this.draggedCard!.gameObject;
         this.draggedCardIsAttack = card.getData("cardTarget") === "attack";
 
-
         const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
         let arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
 
-        if (
-            this.draggedCardIsAttack &&
-            this.isAttackFieldHovered
-        ) {
+        if (this.draggedCardIsAttack && this.isAttackFieldHovered) {
             arrowHead = new Phaser.Math.Vector2(
-                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
-                this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2
+                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width / 2,
+                ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height / 2
             );
         }
 
-        if (
-            !this.draggedCardIsAttack &&
-            this.defenseFieldHoveredTile
-        ) {
+        if (!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
             arrowHead = new Phaser.Math.Vector2(
-                this.DEFENSE_FIELD.x + this.defenseFieldHoveredTile.x * 20 + 10,
-                this.DEFENSE_FIELD.y + this.defenseFieldHoveredTile.y * 20 + 10
+                DEFENSE_FIELD_CONFIG.x +
+                    DEFENSE_FIELD_CONFIG.squareSize *
+                        this.defenseFieldHoveredTile.x +
+                    10,
+                DEFENSE_FIELD_CONFIG.y +
+                    DEFENSE_FIELD_CONFIG.squareSize *
+                        this.defenseFieldHoveredTile.y +
+                    10
             );
         }
 
@@ -308,8 +280,11 @@ export class Play extends Phaser.Scene {
 
             this.addCard();
         }
-        if(!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
-            this.defenseBattlefield.spawnTower(this.defenseFieldHoveredTile.x, this.defenseFieldHoveredTile.y);
+        if (!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
+            this.defenseBattlefield.spawnTower(
+                this.defenseFieldHoveredTile.x,
+                this.defenseFieldHoveredTile.y
+            );
 
             card.destroy();
             this.cards = this.cards.filter((c) => c.gameObject !== card);
@@ -334,9 +309,15 @@ export class Play extends Phaser.Scene {
             this.isAttackFieldHovered = false;
         });
 
-        this.defenseField.on("pointermove", (pointer: Phaser.Input.Pointer, x: number, y: number) => {
-            this.defenseFieldHoveredTile = {x: Math.floor(x / 20), y: Math.floor(y / 20)};
-        });
+        this.defenseField.on(
+            "pointermove",
+            (pointer: Phaser.Input.Pointer, x: number, y: number) => {
+                this.defenseFieldHoveredTile = {
+                    x: Math.floor(x / 20),
+                    y: Math.floor(y / 20),
+                };
+            }
+        );
         this.defenseField.on("pointerout", () => {
             this.defenseFieldHoveredTile = null;
         });
@@ -443,22 +424,21 @@ export class Play extends Phaser.Scene {
 
             const card = this.draggedCard!.gameObject;
 
-
             const polygonPoints = this.draggedCardIsAttack
                 ? [
                       0,
                       0,
-                      this.ATTACK_FIELD.x,
+                      ATTACK_FIELD_CONFIG.x,
                       0,
-                      this.ATTACK_FIELD.x,
-                      this.ATTACK_FIELD.y + this.ATTACK_FIELD.height,
-                      this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
-                      this.ATTACK_FIELD.y + this.ATTACK_FIELD.height,
-                      this.ATTACK_FIELD.x + this.ATTACK_FIELD.width,
-                      this.ATTACK_FIELD.y,
-                      this.ATTACK_FIELD.x,
-                      this.ATTACK_FIELD.y,
-                      this.ATTACK_FIELD.x,
+                      ATTACK_FIELD_CONFIG.x,
+                      ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height,
+                      ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
+                      ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height,
+                      ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
+                      ATTACK_FIELD_CONFIG.y,
+                      ATTACK_FIELD_CONFIG.x,
+                      ATTACK_FIELD_CONFIG.y,
+                      ATTACK_FIELD_CONFIG.x,
                       0,
                       this.scene.systems.scale.width,
                       0,
@@ -470,17 +450,17 @@ export class Play extends Phaser.Scene {
                 : [
                       0,
                       0,
-                      this.DEFENSE_FIELD.x,
+                      DEFENSE_FIELD_CONFIG.x,
                       0,
-                      this.DEFENSE_FIELD.x,
-                      this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height,
-                      this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width,
-                      this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height,
-                      this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width,
-                      this.DEFENSE_FIELD.y,
-                      this.DEFENSE_FIELD.x,
-                      this.DEFENSE_FIELD.y,
-                      this.DEFENSE_FIELD.x,
+                      DEFENSE_FIELD_CONFIG.x,
+                      DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
+                      DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width,
+                      DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
+                      DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width,
+                      DEFENSE_FIELD_CONFIG.y,
+                      DEFENSE_FIELD_CONFIG.x,
+                      DEFENSE_FIELD_CONFIG.y,
+                      DEFENSE_FIELD_CONFIG.x,
                       0,
                       this.scene.systems.scale.width,
                       0,
@@ -499,10 +479,10 @@ export class Play extends Phaser.Scene {
                     this.graphics.fillStyle(0xffffff, 0.25);
                     this.graphics.fillRectShape(
                         new Phaser.Geom.Rectangle(
-                            this.ATTACK_FIELD.x,
-                            this.ATTACK_FIELD.y,
-                            this.ATTACK_FIELD.width,
-                            this.ATTACK_FIELD.height
+                            ATTACK_FIELD_CONFIG.x,
+                            ATTACK_FIELD_CONFIG.y,
+                            ATTACK_FIELD_CONFIG.width,
+                            ATTACK_FIELD_CONFIG.height
                         )
                     );
                 }
@@ -511,8 +491,12 @@ export class Play extends Phaser.Scene {
                     this.graphics.fillStyle(0xffffff, 0.25);
                     this.graphics.fillRectShape(
                         new Phaser.Geom.Rectangle(
-                            this.DEFENSE_FIELD.x + this.defenseFieldHoveredTile.x * 20,
-                            this.DEFENSE_FIELD.y + this.defenseFieldHoveredTile.y * 20,
+                            DEFENSE_FIELD_CONFIG.x +
+                                this.defenseFieldHoveredTile.x *
+                                    DEFENSE_FIELD_CONFIG.squareSize,
+                            DEFENSE_FIELD_CONFIG.y +
+                                this.defenseFieldHoveredTile.y *
+                                    DEFENSE_FIELD_CONFIG.squareSize,
                             20,
                             20
                         )

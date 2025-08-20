@@ -1,10 +1,6 @@
 import { makeMinion, Minion } from "./minion";
-import { makeTower, Tower, TowerIcon } from "./tower";
-
-export type BattlefieldDisplay = {
-    minionIcon: string;
-    towerIcon: TowerIcon;
-};
+import { makeTower, Tower } from "./tower";
+import { BattlefieldConfig, BattlefieldDisplay } from "./types";
 
 export class Battlefield {
     towers: Tower[];
@@ -21,14 +17,13 @@ export class Battlefield {
     width: number;
     height: number;
 
+    config: BattlefieldConfig;
     display: BattlefieldDisplay;
+
 
     constructor(
         scene: Phaser.Scene,
-        x: number,
-        y: number,
-        width: number,
-        height: number,
+        config: BattlefieldConfig,
         display: BattlefieldDisplay
     ) {
         this.towers = [];
@@ -36,11 +31,7 @@ export class Battlefield {
 
         this.scene = scene;
 
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-
+        this.config = config;
         this.display = display;
 
         this.minionGroup = scene.physics.add.group();
@@ -67,10 +58,10 @@ export class Battlefield {
         const wallGroup = scene.physics.add.staticGroup();
 
         wallGroup.addMultiple([
-            scene.add.rectangle(x, y, 20, height).setOrigin(1, 0),
-            scene.add.rectangle(x + width, y, 20, height).setOrigin(0, 0),
-            scene.add.rectangle(x, y, width, 20).setOrigin(0, 1),
-            scene.add.rectangle(x, y + height, width, 20).setOrigin(0, 0),
+            scene.add.rectangle(config.x, config.y, 20, config.height).setOrigin(1, 0),
+            scene.add.rectangle(config.x + config.width, config.y, 20, config.height).setOrigin(0, 0),
+            scene.add.rectangle(config.x, config.y, config.width, 20).setOrigin(0, 1),
+            scene.add.rectangle(config.x, config.y + config.height, config.width, 20).setOrigin(0, 0),
         ]);
 
         scene.physics.add.collider(this.minionGroup, this.towerGroup);
@@ -98,8 +89,8 @@ export class Battlefield {
                 this.scene,
                 this.minionGroup,
                 this.display.minionIcon,
-                this.x + this.width / 2,
-                this.y + this.height / 2
+                this.config.x + this.config.width / 2,
+                this.config.y + this.config.height / 2
             );
             this.units.push(minion);
             minion.setVelocity(
@@ -118,26 +109,15 @@ export class Battlefield {
     spawnTower(x: number, y: number) {
         const tower = makeTower(
             this.scene,
+            this.config,
+            this.display.towerIcon, 
             x,
             y,
-            this.display.towerIcon,
-            this.x,
-            this.y,
             70
         );
+        console.log(tower);
         this.towers.push(tower);
         this.towerGroup.add(tower.gameObject);
-    }
-
-    shoot(tower: Tower, minion: Minion) {
-        const towerPos = tower.gameObject.getWorldPoint();
-        const minionPos = minion.gameObject.getWorldPoint();
-        this.makeJectile(
-            towerPos.x,
-            towerPos.y,
-            minionPos.subtract(towerPos).normalize(),
-            300
-        );
     }
 
     update() {
@@ -168,11 +148,21 @@ export class Battlefield {
                 ) {
                     tower.lastFired = this.scene.time.now;
                     // Shoot
-                    console.log("tower shooting at", closestMinion);
                     this.shoot(tower, closestMinion);
                 }
             }
         });
+    }
+
+    shoot(tower: Tower, minion: Minion) {
+        const towerPos = tower.gameObject.getWorldPoint();
+        const minionPos = minion.gameObject.getWorldPoint();
+        this.makeJectile(
+            towerPos.x,
+            towerPos.y,
+            minionPos.subtract(towerPos).normalize(),
+            150
+        );
     }
 
     makeJectile(
