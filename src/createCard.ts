@@ -12,6 +12,8 @@ type CardParams = {
     selectCard: (cardIndex: number) => boolean;
 };
 
+export type Card = ReturnType<typeof createCard>;
+
 export const createCard = ({
     scene,
     x,

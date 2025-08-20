@@ -1,14 +1,16 @@
 import { createCard } from "./createCard";
 import { Battlefield } from "./battlefield/battlefield";
 import Phaser from "phaser";
+import { Card } from "./createCard";
 
 export class Play extends Phaser.Scene {
     graphics: Phaser.GameObjects.Graphics;
 
-    cards: ReturnType<typeof createCard>[] = [];
+    cards: Card[] = [];
 
     hoveredCardIndex = -1;
-    draggedCardIndex = -1;
+    draggedCard: Card | null = null;
+    draggedCardIsAttack: boolean = false;
     dragStartPosition = { x: 0, y: 0 };
 
     isAttackFieldHovered = false;
@@ -42,14 +44,14 @@ export class Play extends Phaser.Scene {
     }
 
     hoverCard(cardIndex: number) {
-        if (this.draggedCardIndex !== -1) return false;
+        if (this.draggedCard !== null) return false;
         this.hoveredCardIndex = cardIndex;
         this.arrangeCards();
         return true;
     }
 
     dragCard(cardIndex: number) {
-        this.draggedCardIndex = cardIndex;
+        this.draggedCard = this.cards[cardIndex];
     }
 
     init() {
@@ -235,15 +237,32 @@ export class Play extends Phaser.Scene {
         dragY: number
     ) {
         this.dragCard(this.hoveredCardIndex);
-        const card = this.cards[this.draggedCardIndex].gameObject;
+        const card = this.draggedCard!.gameObject;
+        this.draggedCardIsAttack = card.getData("cardTarget") === "attack";
+
 
         const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
-        const arrowHead = this.isAttackFieldHovered
-            ? new Phaser.Math.Vector2(
+        let arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
+
+        if (
+            this.draggedCardIsAttack &&
+            this.isAttackFieldHovered
+        ) {
+            arrowHead = new Phaser.Math.Vector2(
                   this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
                   this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2
-              )
-            : new Phaser.Math.Vector2(pointer.x, pointer.y);
+            );
+        }
+
+        if (
+            !this.draggedCardIsAttack &&
+            this.isDefenseFieldHovered
+        ) {
+            arrowHead = new Phaser.Math.Vector2(
+                this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width / 2,
+                this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height / 2
+            );
+        }
 
         const dragDistance = arrowHead.distance(arrowTail);
 
@@ -261,13 +280,11 @@ export class Play extends Phaser.Scene {
     }
 
     handleCardDragEnd() {
-        if (this.draggedCardIndex === -1) return;
-        const card = this.cards[this.draggedCardIndex].gameObject;
+        if (this.draggedCard === null) return;
+        const card = this.draggedCard.gameObject;
 
-        const isAttackFieldCard = card.getData("cardTarget") === "attack";
-
-        if (isAttackFieldCard && this.isAttackFieldHovered) {
-            this.battlefield.spawnMinions();
+        if (this.draggedCardIsAttack && this.isAttackFieldHovered) {
+            this.attackBattlefield.spawnMinions();
 
             card.destroy();
             this.cards = this.cards.filter((c) => c.gameObject !== card);
@@ -275,7 +292,7 @@ export class Play extends Phaser.Scene {
             this.addCard();
         }
 
-        this.draggedCardIndex = -1;
+        this.draggedCard = null;
         this.hoveredCardIndex = -1;
         this.arrangeCards();
         this.dragArrow = null;
@@ -287,7 +304,6 @@ export class Play extends Phaser.Scene {
 
         this.attackField.on("pointerover", () => {
             this.isAttackFieldHovered = true;
-            console.log("attack field hovered");
         });
         this.attackField.on("pointerout", () => {
             this.isAttackFieldHovered = false;
@@ -301,14 +317,16 @@ export class Play extends Phaser.Scene {
         let cardImage = "";
         let cardDescription = "";
 
-        if(cardTarget === "attack") {
+        if (cardTarget === "attack") {
             cardName = "Minion A ×3";
             cardImage = "💂‍♂️";
-            cardDescription = "Spawns 3 minions. They attack the enemy base. They are not very strong.";
+            cardDescription =
+                "Spawns 3 minions. They attack the enemy base. They are not very strong.";
         } else {
             cardName = "Tower A";
             cardImage = "🏹";
-            cardDescription = "Builds a tower. It defends your base. It is not very strong.";
+            cardDescription =
+                "Builds a tower. It defends your base. It is not very strong.";
         }
 
         this.cards.push(
@@ -388,11 +406,10 @@ export class Play extends Phaser.Scene {
 
             // should also have card
 
-            const card = this.cards[this.draggedCardIndex].gameObject;
+            const card = this.draggedCard!.gameObject;
 
-            const isAttackFieldCard = card.getData("cardTarget") === "attack";
 
-            const polygonPoints = isAttackFieldCard
+            const polygonPoints = this.draggedCardIsAttack
                 ? [
                       0,
                       0,
@@ -442,7 +459,7 @@ export class Play extends Phaser.Scene {
             this.graphics.fillStyle(0x000000, 0.4);
             this.graphics.fillPoints(polygonMask.points, true, true);
 
-            if (isAttackFieldCard) {
+            if (this.draggedCardIsAttack) {
                 if (this.isAttackFieldHovered) {
                     this.graphics.fillStyle(0xffffff, 0.2);
                     this.graphics.fillRectShape(
