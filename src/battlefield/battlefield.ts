@@ -12,7 +12,7 @@ export class Battlefield {
 
         // 400 colliding minions, without towers, still fit within 120fps.
         // 500 colliding minions drops significantly.
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 10; i++) {
             const minion = makeMinion(scene);
             this.units.push(minion);
             minion.setVelocity(
@@ -24,6 +24,8 @@ export class Battlefield {
         const unitBodies = this.units.map((unit) => unit.gameObject.body as Phaser.Physics.Arcade.Body);
 
         this.towers.push(makeTower(scene, 5, 5));
+
+        this.towers.push(makeTower(scene, 10, 7));
 
         // Tower track first minion
         if (this.units.length > 0) {
