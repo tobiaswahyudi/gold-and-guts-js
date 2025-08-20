@@ -35,7 +35,7 @@ export const createCard = ({
 
     const CARD_SCALE = 1.3;
 
-    if(cardTarget === "attack") {
+    if (cardTarget === "attack") {
         cardName = "Minion A ×3";
     } else {
         cardName = "Tower A";
@@ -62,9 +62,9 @@ export const createCard = ({
     const card = scene.add
         .rectangle(0, 0, cardWidth, cardHeight)
         .setFillStyle(color.color)
-        .setStrokeStyle(1, 0x444444, 1)
+        .setStrokeStyle(2, color.darken(30).color, 1)
         .setName(cardName)
-        .setInteractive({draggable: true});
+        .setInteractive({ draggable: true });
 
     cardGroup.add(card);
 
@@ -80,7 +80,10 @@ export const createCard = ({
     );
 
     cardGroup.add(
-        scene.add.rectangle(0, -20, cardWidth - 12, 72).setFillStyle(0xeeeeee)
+        scene.add
+            .rectangle(0, -20, cardWidth - 12, 72)
+            .setFillStyle(0xeeeeee)
+            .setStrokeStyle(1, 0xbbbbbb, 1)
     );
 
     cardGroup.add(
@@ -111,7 +114,6 @@ export const createCard = ({
             duration: 100,
             ease: "Power2.easeInOut",
         });
-
     };
 
     const unhoverCard = () => {
