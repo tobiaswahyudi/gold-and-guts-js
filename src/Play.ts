@@ -14,13 +14,15 @@ export class Play extends Phaser.Scene {
     dragStartPosition = { x: 0, y: 0 };
 
     isAttackFieldHovered = false;
+    isDefenseFieldHovered = false;
 
     attackField: Phaser.GameObjects.Grid;
     defenseField: Phaser.GameObjects.Grid;
 
     dragArrow: Phaser.Curves.Curve | null = null;
 
-    battlefield: Battlefield;
+    attackBattlefield: Battlefield;
+    defenseBattlefield: Battlefield;
 
     // Grid configuration
     DEFENSE_FIELD = {
@@ -170,7 +172,7 @@ export class Play extends Phaser.Scene {
             repeat: -1,
         });
 
-        this.battlefield = new Battlefield(
+        this.attackBattlefield = new Battlefield(
             this,
             this.ATTACK_FIELD.x,
             this.ATTACK_FIELD.y,
@@ -181,6 +183,21 @@ export class Play extends Phaser.Scene {
                 towerIcon: {
                     icon: "🔱",
                     rotationOffset: Math.PI / 2,
+                },
+            }
+        );
+
+        this.defenseBattlefield = new Battlefield(
+            this,
+            this.DEFENSE_FIELD.x,
+            this.DEFENSE_FIELD.y,
+            this.DEFENSE_FIELD.width,
+            this.DEFENSE_FIELD.height,
+            {
+                minionIcon: "👿",
+                towerIcon: {
+                    icon: "🏹",
+                    rotationOffset: Math.PI / 4,
                 },
             }
         );
@@ -249,8 +266,8 @@ export class Play extends Phaser.Scene {
             this.isAttackFieldHovered
         ) {
             arrowHead = new Phaser.Math.Vector2(
-                  this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
-                  this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2
+                this.ATTACK_FIELD.x + this.ATTACK_FIELD.width / 2,
+                this.ATTACK_FIELD.y + this.ATTACK_FIELD.height / 2
             );
         }
 
@@ -308,10 +325,16 @@ export class Play extends Phaser.Scene {
         this.attackField.on("pointerout", () => {
             this.isAttackFieldHovered = false;
         });
+
+        this.defenseField.on("pointerover", () => {
+            this.isDefenseFieldHovered = true;
+        });
+        this.defenseField.on("pointerout", () => {
+            this.isDefenseFieldHovered = false;
+        });
     }
 
     addCard() {
-
         const cardTarget = Math.random() > 0.5 ? "attack" : "defense";
         let cardName = "";
         let cardImage = "";
@@ -468,6 +491,18 @@ export class Play extends Phaser.Scene {
                             this.ATTACK_FIELD.y,
                             this.ATTACK_FIELD.width,
                             this.ATTACK_FIELD.height
+                        )
+                    );
+                }
+            } else {
+                if (this.isDefenseFieldHovered) {
+                    this.graphics.fillStyle(0xffffff, 0.2);
+                    this.graphics.fillRectShape(
+                        new Phaser.Geom.Rectangle(
+                            this.DEFENSE_FIELD.x,
+                            this.DEFENSE_FIELD.y,
+                            this.DEFENSE_FIELD.width,
+                            this.DEFENSE_FIELD.height
                         )
                     );
                 }
