@@ -1,6 +1,6 @@
 export type Minion = ReturnType<typeof makeMinion>;
 
-export const makeMinion = (scene: Phaser.Scene, minionGroup: Phaser.Physics.Arcade.Group, x: number, y: number) => {
+export const makeMinion = (scene: Phaser.Scene, minionGroup: Phaser.Physics.Arcade.Group, minionIcon: string, x: number, y: number) => {
     // just have them bounce around for now
     let vel = {
         x: 10,
@@ -8,7 +8,7 @@ export const makeMinion = (scene: Phaser.Scene, minionGroup: Phaser.Physics.Arca
     };
 
     const group = scene.add.container(x, y).setSize(20, 20);
-    const text = scene.add.text(0, 0, "👿").setFontSize(16).setAlign("center").setOrigin(0.5, 0.5);
+    const text = scene.add.text(0, 0, minionIcon).setFontSize(16).setAlign("center").setOrigin(0.5, 0.5);
 
     minionGroup.add(group);
     const body = group.body as Phaser.Physics.Arcade.Body;

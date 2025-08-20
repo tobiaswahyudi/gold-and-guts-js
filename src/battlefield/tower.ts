@@ -1,14 +1,19 @@
 export type Tower = ReturnType<typeof makeTower>;
 
-export const makeTower = (scene: Phaser.Scene, x: number, y: number) => {
+export type TowerIcon = {
+    icon: string;
+    rotationOffset: number;
+}
+
+export const makeTower = (scene: Phaser.Scene, x: number, y: number, icon: TowerIcon) => {
     // x and y represent grid position. Mult with the square size.
     // THIS SHOULD BE EXTRACTED INTO CONSTANTS, ALONG WITH THE GRID SIZE IN Play.ts
     x = (x + 0.5) * 20 + 524;
     y = (y + 0.5) * 20 + 32;
 
     const group = scene.add.container(x, y).setSize(20, 20);
-    const rect = scene.add.rectangle(0, 0, 16, 16, 0x222222, 1);
-    const text = scene.add.text(0, 0, "🏹").setFontSize(40).setAlign("center").setDisplayOrigin(19, 19).setScale(0.4);
+    const rect = scene.add.rectangle(0, 0, 17, 17, 0x222222, 1);
+    const text = scene.add.text(0, 0, icon.icon).setFontSize(40).setAlign("center").setDisplayOrigin(19, 19).setScale(0.4);
 
     scene.physics.add.existing(group, true);
 
@@ -28,7 +33,7 @@ export const makeTower = (scene: Phaser.Scene, x: number, y: number) => {
         // Only recalculate if target has moved (performance optimization)
         if (targetX !== lastTargetX || targetY !== lastTargetY) {
             const angle = Math.atan2(targetY - group.y, targetX - group.x);
-            text.setRotation(angle + Math.PI / 4);
+            text.setRotation(angle + icon.rotationOffset);
             lastTargetX = targetX;
             lastTargetY = targetY;
         }

@@ -173,7 +173,14 @@ export class Play extends Phaser.Scene {
             this.ATTACK_FIELD.x,
             this.ATTACK_FIELD.y,
             this.ATTACK_FIELD.width,
-            this.ATTACK_FIELD.height
+            this.ATTACK_FIELD.height,
+            {
+                minionIcon: "💂‍♂️",
+                towerIcon: {
+                    icon: "🔱",
+                    rotationOffset: Math.PI / 2,
+                },
+            }
         );
     }
 

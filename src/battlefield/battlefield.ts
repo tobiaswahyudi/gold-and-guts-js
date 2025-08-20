@@ -1,6 +1,11 @@
 // import { makeTower } from "./tower";
 import { makeMinion, Minion } from "./minion";
-import { makeTower, Tower } from "./tower";
+import { makeTower, Tower, TowerIcon } from "./tower";
+
+export type BattlefieldDisplay = {
+    minionIcon: string;
+    towerIcon: TowerIcon;
+}
 
 export class Battlefield {
     towers: Tower[];
@@ -15,12 +20,15 @@ export class Battlefield {
     width: number;
     height: number;
 
+    display: BattlefieldDisplay;
+
     constructor(
         scene: Phaser.Scene,
         x: number,
         y: number,
         width: number,
-        height: number
+        height: number,
+        display: BattlefieldDisplay,
     ) {
         this.towers = [];
         this.units = [];
@@ -32,6 +40,8 @@ export class Battlefield {
         this.width = width;
         this.height = height;
 
+        this.display = display;
+
         this.minionGroup = scene.physics.add.group();
 
         // 400 colliding minions, without towers, still fit within 120fps.
@@ -40,8 +50,8 @@ export class Battlefield {
 
         const towerGroup = scene.physics.add.staticGroup();
 
-        this.towers.push(makeTower(scene, 5, 5));
-        this.towers.push(makeTower(scene, 10, 7));
+        this.towers.push(makeTower(scene, 5, 5, display.towerIcon));
+        this.towers.push(makeTower(scene, 10, 7, display.towerIcon));
 
         this.towers.forEach((tower) => {
             towerGroup.add(tower.gameObject);
@@ -67,11 +77,12 @@ export class Battlefield {
 
     spawnMinions() {
         for (let i = 0; i < 3; i++) {
-            const minion = makeMinion(
+            const minion = makeMinion(  
                 this.scene,
                 this.minionGroup,
+                this.display.minionIcon,
                 this.x + this.width / 2,
-                this.y + this.height / 2
+                this.y + this.height / 2,
             );
             this.units.push(minion);
             minion.setVelocity(
