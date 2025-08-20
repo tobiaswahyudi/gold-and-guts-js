@@ -35,6 +35,12 @@ export const createCard = ({
 
     const CARD_SCALE = 1.3;
 
+    if(cardTarget === "attack") {
+        cardName = "Minion A ×3";
+    } else {
+        cardName = "Tower A";
+    }
+
     const colorHex = cardTarget === "attack" ? "#E0BFA7" : "#6f947f";
     const color = Phaser.Display.Color.HexStringToColor(colorHex)
         .saturate(20)

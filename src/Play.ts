@@ -213,38 +213,11 @@ export class Play extends Phaser.Scene {
     }
 
     setupCards() {
-        this.cards = [
-            createCard({
-                scene: this,
-                x: 100,
-                y: 540,
-                selectCard: this.hoverCard.bind(this),
-            }),
-            createCard({
-                scene: this,
-                x: 150,
-                y: 540,
-                selectCard: this.hoverCard.bind(this),
-            }),
-            createCard({
-                scene: this,
-                x: 200,
-                y: 540,
-                selectCard: this.hoverCard.bind(this),
-            }),
-            createCard({
-                scene: this,
-                x: 150,
-                y: 540,
-                selectCard: this.hoverCard.bind(this),
-            }),
-            createCard({
-                scene: this,
-                x: 200,
-                y: 540,
-                selectCard: this.hoverCard.bind(this),
-            }),
-        ];
+        this.addCard();
+        this.addCard();
+        this.addCard();
+        this.addCard();
+        this.addCard();
 
         this.arrangeCards();
     }
@@ -289,9 +262,15 @@ export class Play extends Phaser.Scene {
 
         if (isAttackFieldCard && this.isAttackFieldHovered) {
             this.battlefield.spawnMinions();
+
+            card.destroy();
+            this.cards = this.cards.filter((c) => c.gameObject !== card);
+
+            this.addCard();
         }
 
         this.draggedCardIndex = -1;
+        this.hoveredCardIndex = -1;
         this.arrangeCards();
         this.dragArrow = null;
     }
@@ -307,6 +286,17 @@ export class Play extends Phaser.Scene {
         this.attackField.on("pointerout", () => {
             this.isAttackFieldHovered = false;
         });
+    }
+
+    addCard() {
+        this.cards.push(
+            createCard({
+                scene: this,
+                x: 150,
+                y: 540,
+                selectCard: this.hoverCard.bind(this),
+            })
+        );
     }
 
     arrangeCards() {
