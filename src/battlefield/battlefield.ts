@@ -14,6 +14,7 @@ export class Battlefield {
     scene: Phaser.Scene;
 
     minionGroup: Phaser.Physics.Arcade.Group;
+    towerGroup: Phaser.Physics.Arcade.StaticGroup;
 
     x: number;
     y: number;
@@ -48,13 +49,13 @@ export class Battlefield {
         // 500 colliding minions drops significantly.
         this.spawnMinions();
 
-        const towerGroup = scene.physics.add.staticGroup();
+        this.towerGroup = scene.physics.add.staticGroup();
 
-        this.towers.push(makeTower(scene, 5, 5, display.towerIcon));
-        this.towers.push(makeTower(scene, 10, 7, display.towerIcon));
+        this.spawnTower(5, 5);
+        this.spawnTower(10, 7);
 
         this.towers.forEach((tower) => {
-            towerGroup.add(tower.gameObject);
+            this.towerGroup.add(tower.gameObject);
         });
 
         // Tower track first minion
@@ -71,7 +72,7 @@ export class Battlefield {
             scene.add.rectangle(x, y + height, width, 20).setOrigin(0, 0),
         ]);
 
-        scene.physics.add.collider(this.minionGroup, towerGroup);
+        scene.physics.add.collider(this.minionGroup, this.towerGroup);
         scene.physics.add.collider(this.minionGroup, wallGroup);
     }
 
@@ -90,5 +91,11 @@ export class Battlefield {
                 (Math.random() - 0.5) * 200
             );
         }
+    }
+
+    spawnTower(x: number, y: number) {
+        const tower = makeTower(this.scene, x, y, this.display.towerIcon, this.x, this.y);
+        this.towers.push(tower);
+        this.towerGroup.add(tower.gameObject);
     }
 }

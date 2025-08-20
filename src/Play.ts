@@ -14,7 +14,7 @@ export class Play extends Phaser.Scene {
     dragStartPosition = { x: 0, y: 0 };
 
     isAttackFieldHovered = false;
-    isDefenseFieldHovered = false;
+    defenseFieldHoveredTile: {x: number, y: number} | null = null;
 
     attackField: Phaser.GameObjects.Grid;
     defenseField: Phaser.GameObjects.Grid;
@@ -273,11 +273,11 @@ export class Play extends Phaser.Scene {
 
         if (
             !this.draggedCardIsAttack &&
-            this.isDefenseFieldHovered
+            this.defenseFieldHoveredTile
         ) {
             arrowHead = new Phaser.Math.Vector2(
-                this.DEFENSE_FIELD.x + this.DEFENSE_FIELD.width / 2,
-                this.DEFENSE_FIELD.y + this.DEFENSE_FIELD.height / 2
+                this.DEFENSE_FIELD.x + this.defenseFieldHoveredTile.x * 20 + 10,
+                this.DEFENSE_FIELD.y + this.defenseFieldHoveredTile.y * 20 + 10
             );
         }
 
@@ -308,6 +308,14 @@ export class Play extends Phaser.Scene {
 
             this.addCard();
         }
+        if(!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
+            this.defenseBattlefield.spawnTower(this.defenseFieldHoveredTile.x, this.defenseFieldHoveredTile.y);
+
+            card.destroy();
+            this.cards = this.cards.filter((c) => c.gameObject !== card);
+
+            this.addCard();
+        }
 
         this.draggedCard = null;
         this.hoveredCardIndex = -1;
@@ -326,11 +334,11 @@ export class Play extends Phaser.Scene {
             this.isAttackFieldHovered = false;
         });
 
-        this.defenseField.on("pointerover", () => {
-            this.isDefenseFieldHovered = true;
+        this.defenseField.on("pointermove", (pointer: Phaser.Input.Pointer, x: number, y: number) => {
+            this.defenseFieldHoveredTile = {x: Math.floor(x / 20), y: Math.floor(y / 20)};
         });
         this.defenseField.on("pointerout", () => {
-            this.isDefenseFieldHovered = false;
+            this.defenseFieldHoveredTile = null;
         });
     }
 
@@ -484,7 +492,7 @@ export class Play extends Phaser.Scene {
 
             if (this.draggedCardIsAttack) {
                 if (this.isAttackFieldHovered) {
-                    this.graphics.fillStyle(0xffffff, 0.2);
+                    this.graphics.fillStyle(0xffffff, 0.25);
                     this.graphics.fillRectShape(
                         new Phaser.Geom.Rectangle(
                             this.ATTACK_FIELD.x,
@@ -495,14 +503,14 @@ export class Play extends Phaser.Scene {
                     );
                 }
             } else {
-                if (this.isDefenseFieldHovered) {
-                    this.graphics.fillStyle(0xffffff, 0.2);
+                if (this.defenseFieldHoveredTile) {
+                    this.graphics.fillStyle(0xffffff, 0.25);
                     this.graphics.fillRectShape(
                         new Phaser.Geom.Rectangle(
-                            this.DEFENSE_FIELD.x,
-                            this.DEFENSE_FIELD.y,
-                            this.DEFENSE_FIELD.width,
-                            this.DEFENSE_FIELD.height
+                            this.DEFENSE_FIELD.x + this.defenseFieldHoveredTile.x * 20,
+                            this.DEFENSE_FIELD.y + this.defenseFieldHoveredTile.y * 20,
+                            20,
+                            20
                         )
                     );
                 }
