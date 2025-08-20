@@ -52,6 +52,12 @@ export class Play extends Phaser.Scene {
     create() {
         this.graphics = this.add.graphics().setDepth(1000);
 
+        this.setupBattlefields();
+        this.setupResourcesUi();
+        this.setupCards();
+    }
+
+    setupBattlefields() {
         const attackGrid = this.add.grid(
             this.defenseField.x + this.defenseField.width / 2,
             this.defenseField.y + this.defenseField.height / 2,
@@ -75,8 +81,6 @@ export class Play extends Phaser.Scene {
         defenseGrid.setFillStyle(0xe0bfa7);
         defenseGrid.setAltFillStyle(0xd6b6a0);
         defenseGrid.setOutlineStyle();
-
-        // const rec = this.add.rectangle(100, 500, 100, 160)
 
         const defendText = this.add
             .text(
@@ -151,8 +155,17 @@ export class Play extends Phaser.Scene {
             repeat: -1,
         });
 
-        // CREST
+        this.physics.world.setBounds(
+            this.attackField.x,
+            this.attackField.y,
+            this.attackField.width,
+            this.attackField.height
+        );
 
+        new Battlefield(this);
+    }
+
+    setupResourcesUi() {
         this.add.sprite(50, 570, "crest").setDisplaySize(60, 100);
 
         this.add
@@ -184,20 +197,9 @@ export class Play extends Phaser.Scene {
             .setAlign("right")
             .setResolution(4)
             .setOrigin(0, 0.5);
+    }
 
-        // Battlefields
-
-        this.physics.world.setBounds(
-            this.attackField.x,
-            this.attackField.y,
-            this.attackField.width,
-            this.attackField.height
-        );
-
-        new Battlefield(this);
-
-        // CARDS
-
+    setupCards() {
         this.cards = [
             createCard({
                 scene: this,
@@ -233,39 +235,45 @@ export class Play extends Phaser.Scene {
 
         this.arrangeCards();
 
-        this.input.on(
-            "drag",
-            (pointer: any, _gameObject: any, dragX: number, dragY: number) => {
-                this.dragCard(this.hoveredCardIndex);
-                const card = this.cards[this.draggedCardIndex].gameObject;
+        this.setupCardDrag();
+    }
 
-                const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
-                const arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
+    handleCardDrag(
+        pointer: any,
+        _gameObject: any,
+        dragX: number,
+        dragY: number
+    ) {
+        this.dragCard(this.hoveredCardIndex);
+        const card = this.cards[this.draggedCardIndex].gameObject;
 
-                const dragDistance = arrowHead.distance(arrowTail);
+        const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
+        const arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
 
-                const controlPointDistance = Math.min(
-                    (dragDistance * dragDistance) / 150,
-                    150
-                );
-                const controlPoint = new Phaser.Math.Vector2(
-                    0,
-                    -controlPointDistance
-                );
+        const dragDistance = arrowHead.distance(arrowTail);
 
-                this.dragArrow = new Phaser.Curves.QuadraticBezier(
-                    arrowTail,
-                    arrowTail.clone().add(controlPoint),
-                    arrowHead
-                );
-            }
+        const controlPointDistance = Math.min(
+            (dragDistance * dragDistance) / 150,
+            150
         );
+        const controlPoint = new Phaser.Math.Vector2(0, -controlPointDistance);
 
-        this.input.on("dragend", () => {
-            this.draggedCardIndex = -1;
-            this.arrangeCards();
-            this.dragArrow = null;
-        });
+        this.dragArrow = new Phaser.Curves.QuadraticBezier(
+            arrowTail,
+            arrowTail.clone().add(controlPoint),
+            arrowHead
+        );
+    }
+
+    handleCardDragEnd() {
+        this.draggedCardIndex = -1;
+        this.arrangeCards();
+        this.dragArrow = null;
+    }
+
+    setupCardDrag() {
+        this.input.on("drag", this.handleCardDrag.bind(this));
+        this.input.on("dragend", this.handleCardDragEnd.bind(this));
     }
 
     arrangeCards() {
