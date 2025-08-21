@@ -1,6 +1,7 @@
 import MinHeap from "../utils/pq";
+import { BattlefieldConfig } from "./types";
 
-const makeCell = (x: number, y: number) => ({
+export const makeCell = (x: number, y: number) => ({
     x,
     y,
     to: [] as [number, number][],
@@ -8,7 +9,7 @@ const makeCell = (x: number, y: number) => ({
     weight: 1,
 });
 
-type Cell = ReturnType<typeof makeCell>;
+export type Cell = ReturnType<typeof makeCell>;
 
 type Track = {
     x: number;
@@ -43,20 +44,28 @@ const ADJACENTS = [
     ...DIAGONALS.map((v) => [...v, SQRT_2]),
 ];
 
-
 export class PathGrid {
     grid: Cell[][];
     base: [number, number];
     size: number;
+    squareSize: number;
 
-    constructor(size: number, base: [number, number]) {
-        this.grid = new Array(size)
+    constructor(config: BattlefieldConfig) {
+        this.grid = new Array(config.gridSize)
             .fill(0)
             .map((_, i) =>
-                new Array(size).fill(0).map((_, j) => makeCell(i, j))
+                new Array(config.gridSize)
+                    .fill(0)
+                    .map((_, j) =>
+                        makeCell(
+                            (i + 0.5) * config.squareSize + config.x,
+                            (j + 0.5) * config.squareSize + config.y
+                        )
+                    )
             );
-        this.base = base;
-        this.size = size;
+        this.base = config.base;
+        this.size = config.gridSize;
+        this.squareSize = config.squareSize;
     }
 
     inBounds(x: number, y: number) {
@@ -83,7 +92,6 @@ export class PathGrid {
                 }
                 continue;
             }
-            console.log(x, y, cost, from);
             visited[x][y] = true;
             this.grid[x][y].cost = cost;
             this.grid[x][y].to.push(from);
