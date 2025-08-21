@@ -1,6 +1,9 @@
 import { makeMinion, Minion } from "./minion";
 import { makeTower, Tower } from "./tower";
 import { BattlefieldConfig, BattlefieldDisplay } from "./types";
+import { PathGrid } from "./pathGrid";
+
+const DEBUG = true;
 
 export class Battlefield {
     towers: Tower[];
@@ -20,6 +23,9 @@ export class Battlefield {
     config: BattlefieldConfig;
     display: BattlefieldDisplay;
 
+    pathGrid: PathGrid;
+
+    debug: Phaser.GameObjects.Graphics;
 
     constructor(
         scene: Phaser.Scene,
@@ -33,6 +39,14 @@ export class Battlefield {
 
         this.config = config;
         this.display = display;
+
+        this.pathGrid = new PathGrid(config.gridSize, [
+            config.base[0],
+            config.base[1],
+        ]);
+        this.pathGrid.recompute();
+
+        console.log(this.pathGrid.grid);
 
         this.minionGroup = scene.physics.add.group();
         this.projectileGroup = scene.physics.add.group();
@@ -58,10 +72,18 @@ export class Battlefield {
         const wallGroup = scene.physics.add.staticGroup();
 
         wallGroup.addMultiple([
-            scene.add.rectangle(config.x, config.y, 20, config.height).setOrigin(1, 0),
-            scene.add.rectangle(config.x + config.width, config.y, 20, config.height).setOrigin(0, 0),
-            scene.add.rectangle(config.x, config.y, config.width, 20).setOrigin(0, 1),
-            scene.add.rectangle(config.x, config.y + config.height, config.width, 20).setOrigin(0, 0),
+            scene.add
+                .rectangle(config.x, config.y, 20, config.height)
+                .setOrigin(1, 0),
+            scene.add
+                .rectangle(config.x + config.width, config.y, 20, config.height)
+                .setOrigin(0, 0),
+            scene.add
+                .rectangle(config.x, config.y, config.width, 20)
+                .setOrigin(0, 1),
+            scene.add
+                .rectangle(config.x, config.y + config.height, config.width, 20)
+                .setOrigin(0, 0),
         ]);
 
         scene.physics.add.collider(this.minionGroup, this.towerGroup);
@@ -77,10 +99,14 @@ export class Battlefield {
             this.projectileGroup,
             this.minionGroup,
             (projectile, minion) => {
-                this.deleteMinion(minion as Phaser.Types.Physics.Arcade.GameObjectWithBody);
+                this.deleteMinion(
+                    minion as Phaser.Types.Physics.Arcade.GameObjectWithBody
+                );
                 projectile.destroy();
             }
         );
+
+        this.debug = scene.add.graphics().setDepth(99000);
     }
 
     spawnMinions() {
@@ -110,12 +136,11 @@ export class Battlefield {
         const tower = makeTower(
             this.scene,
             this.config,
-            this.display.towerIcon, 
+            this.display.towerIcon,
             x,
             y,
             70
         );
-        console.log(tower);
         this.towers.push(tower);
         this.towerGroup.add(tower.gameObject);
     }
@@ -152,6 +177,23 @@ export class Battlefield {
                 }
             }
         });
+
+        if (DEBUG) {
+            this.debug.clear();
+            this.debug.lineStyle(1, 0xff0000, 1);
+            for (let i = 0; i < this.pathGrid.size; i++) {
+                for (let j = 0; j < this.pathGrid.size; j++) {
+                    for (const [x, y] of this.pathGrid.grid[i][j].to) {
+                        this.debug.lineBetween(
+                            this.config.x + (i + 0.5) * 20,
+                            this.config.y + (j + 0.5) * 20,
+                            this.config.x + (x + 0.5) * 20,
+                            this.config.y + (y + 0.5) * 20
+                        );
+                    }
+                }
+            }
+        }
     }
 
     shoot(tower: Tower, minion: Minion) {

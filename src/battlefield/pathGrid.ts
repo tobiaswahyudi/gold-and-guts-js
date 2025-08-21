@@ -46,8 +46,8 @@ const ADJACENTS = [
 
 export class PathGrid {
     grid: Cell[][];
-    private base: [number, number];
-    private size: number;
+    base: [number, number];
+    size: number;
 
     constructor(size: number, base: [number, number]) {
         this.grid = new Array(size)
@@ -73,18 +73,20 @@ export class PathGrid {
             from: [-1, -1],
             cost: 0,
         });
-        visited[this.base[0]][this.base[1]] = true;
 
         while (!pq.isEmpty()) {
             const { x, y, from, cost } = pq.pop();
-            if (visited[x][y]) continue;
+            if (visited[x][y]) {
+                if (this.grid[x][y].cost + EPSILON >= cost) {
+                    // also track this cell as a next path
+                    this.grid[x][y].to.push(from);
+                }
+                continue;
+            }
+            console.log(x, y, cost, from);
             visited[x][y] = true;
             this.grid[x][y].cost = cost;
             this.grid[x][y].to.push(from);
-
-            if (x === this.base[0] && y === this.base[1]) {
-                return from;
-            }
 
             for (const [dx, dy, dist] of ADJACENTS) {
                 const nx = x + dx;
@@ -95,7 +97,7 @@ export class PathGrid {
                 const newCost = cost + weight;
 
                 if (visited[nx][ny]) {
-                    if (this.grid[nx][ny].cost <= newCost + EPSILON) {
+                    if (this.grid[nx][ny].cost + EPSILON >= newCost) {
                         // also track this cell as a next path
                         this.grid[nx][ny].to.push([x, y]);
                     }
