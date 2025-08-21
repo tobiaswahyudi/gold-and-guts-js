@@ -4,6 +4,7 @@ export interface BattlefieldConfig {
     width: number;
     height: number;
 
+    gridSize: number;
     squareSize: number;
 
     spawnPoints: [number, number][];

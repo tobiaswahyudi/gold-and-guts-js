@@ -5,6 +5,7 @@ export const DEFENSE_FIELD_CONFIG: BattlefieldConfig = {
     y: 32,
     width: 400,
     height: 400,
+    gridSize: 20,
     squareSize: 20,
     spawnPoints: [],
     base: [0, 0],
@@ -23,9 +24,10 @@ export const ATTACK_FIELD_CONFIG: BattlefieldConfig = {
     y: 32,
     width: 400,
     height: 400,
+    gridSize: 20,
     squareSize: 20,
     spawnPoints: [],
-    base: [0, 0],
+    base: [19, 19],
 };
 
 export const ATTACK_FIELD_DISPLAY: BattlefieldDisplay = {
