@@ -59,6 +59,27 @@ export class Play extends Phaser.Scene {
         this.setupCards();
 
         this.setupListeners();
+        this.setupEnemyAction();
+    }
+
+    setupEnemyAction() {
+        this.time.addEvent({
+            delay: 3000,
+            callback: this.enemyAction.bind(this),
+            loop: true,
+        });
+    }
+
+    enemyAction() {
+        const action = Math.random() > 0.5 ? "spawn" : "attack";
+        console.log("enemy action", action);
+        if (action === "spawn") {
+            this.defenseBattlefield.spawnMinions();
+        } else {
+            const randomRow = Math.floor(Math.random() * ATTACK_FIELD_CONFIG.gridSize);
+            const randomColumn = Math.floor(Math.random() * ATTACK_FIELD_CONFIG.gridSize);
+            this.attackBattlefield.spawnTower(randomRow, randomColumn);
+        }
     }
 
     setupBattlefields() {
