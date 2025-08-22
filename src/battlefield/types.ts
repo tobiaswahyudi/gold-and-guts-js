@@ -19,4 +19,5 @@ export interface TowerIcon {
 export interface BattlefieldDisplay {
     minionIcon: string;
     towerIcon: TowerIcon;
+    baseIcon: string;
 }

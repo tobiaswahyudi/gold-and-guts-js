@@ -1,5 +1,7 @@
 import { Cell } from "./pathGrid";
 
+const DEBUG = false;
+
 const ARRIVED_THRESHOLD = 3;
 
 export class Minion {
@@ -39,9 +41,11 @@ export class Minion {
         this.debug = scene.add.graphics().setDepth(99000);
 
         scene.events.on("postupdate", () => {
-            this.debug.clear();
-            this.debug.lineStyle(1, 0xff0000, 1);
-            this.debug.lineBetween(this.gameObject.x, this.gameObject.y, this.target.x, this.target.y);
+            if (DEBUG) {
+                this.debug.clear();
+                this.debug.lineStyle(1, 0xff0000, 1);
+                this.debug.lineBetween(this.gameObject.x, this.gameObject.y, this.target.x, this.target.y);
+            }
             // console.log(this.body.velocity.length());
         });
     }

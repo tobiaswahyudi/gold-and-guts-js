@@ -17,6 +17,7 @@ export const DEFENSE_FIELD_DISPLAY: BattlefieldDisplay = {
         icon: "🏹",
         rotationOffset: Math.PI / 4,
     },
+    baseIcon: "🏰",
 }
 
 export const ATTACK_FIELD_CONFIG: BattlefieldConfig = {
@@ -36,4 +37,5 @@ export const ATTACK_FIELD_DISPLAY: BattlefieldDisplay = {
         icon: "🔱",
         rotationOffset: Math.PI / 2,
     },
+    baseIcon: "🌋",
 }

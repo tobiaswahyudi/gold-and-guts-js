@@ -2,8 +2,9 @@ import { Minion } from "./minion";
 import { makeTower, Tower } from "./tower";
 import { BattlefieldConfig, BattlefieldDisplay } from "./types";
 import { PathGrid } from "./pathGrid";
+import { makeStructure } from "./structure";
 
-const DEBUG = true;
+const DEBUG = false;
 
 export class Battlefield {
     towers: Tower[];
@@ -21,6 +22,8 @@ export class Battlefield {
     pathGrid: PathGrid;
 
     debug: Phaser.GameObjects.Graphics;
+
+    lastSpawnPoint: number = 0;
 
     constructor(
         scene: Phaser.Scene,
@@ -105,6 +108,20 @@ export class Battlefield {
             }
         );
 
+        const { group: base } = makeStructure(scene, config, display.baseIcon, config.base[0], config.base[1]);
+        scene.physics.add.existing(base, true);
+
+        scene.physics.add.collider(
+            this.minionGroup,
+            base,
+            (base, minion) => {
+                // console.log("minion hit base", minion, base);
+                this.deleteMinion(minion as Phaser.Types.Physics.Arcade.GameObjectWithBody);
+                this.units.filter((m) => m.gameObject !== minion);
+                this.spawnMinions(2);
+            }
+        );
+
         this.debug = scene.add.graphics().setDepth(99000);
     }
 
@@ -115,8 +132,8 @@ export class Battlefield {
 
     spawnMinions(num: number = 3) {
         for (let i = 0; i < num; i++) {
-            const spawnPoint =
-                this.config.spawnPoints[i % this.config.spawnPoints.length];
+            const spawnPoint = this.config.spawnPoints[this.lastSpawnPoint];
+            this.lastSpawnPoint = (this.lastSpawnPoint + 1) % this.config.spawnPoints.length;
             const cell = this.pathGrid.grid[spawnPoint[0]][spawnPoint[1]];
 
             const minion = new Minion(
@@ -192,14 +209,14 @@ export class Battlefield {
                 // @ts-ignore dumbass
                 tower.setLookAt(closestMinion.gameObject);
 
-                // if (
-                //     tower.lastFired + tower.fireDelayTime <=
-                //     this.scene.time.now
-                // ) {
-                //     tower.lastFired = this.scene.time.now;
-                //     // Shoot
-                //     this.shoot(tower, closestMinion);
-                // }
+                if (
+                    tower.lastFired + tower.fireDelayTime <=
+                    this.scene.time.now
+                ) {
+                    tower.lastFired = this.scene.time.now;
+                    // Shoot
+                    this.shoot(tower, closestMinion);
+                }
             }
         });
 
