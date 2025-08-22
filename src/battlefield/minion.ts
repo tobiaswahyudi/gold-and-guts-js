@@ -1,64 +1,70 @@
-import { Cell, makeCell } from "./pathGrid";
-
-export type Minion = ReturnType<typeof makeMinion>;
+import { Cell } from "./pathGrid";
 
 const ARRIVED_THRESHOLD = 3;
 
-export const makeMinion = (
-    scene: Phaser.Scene,
-    minionGroup: Phaser.Physics.Arcade.Group,
-    minionIcon: string,
-    x: number,
-    y: number,
-    velocity: number
-) => {
-    const group = scene.add.container(x, y).setSize(20, 20);
-    const text = scene.add
-        .text(0, 0, minionIcon)
-        .setFontSize(16)
-        .setAlign("center")
-        .setOrigin(0.5, 0.5);
+export class Minion {
+    scene: Phaser.Scene;
+    gameObject: Phaser.GameObjects.Container;
+    body: Phaser.Physics.Arcade.Body;
+    target: Cell;
+    velocity: number;
+    debug: Phaser.GameObjects.Graphics;
 
-    let target: Cell = makeCell(x, y);
+    constructor(
+        scene: Phaser.Scene,
+        minionGroup: Phaser.Physics.Arcade.Group,
+        minionIcon: string,
+        x: number,
+        y: number,
+        velocity: number
+    ) {
+        this.scene = scene;
+        this.velocity = velocity;
+        this.gameObject = scene.add.container(x, y).setSize(20, 20);
+        const text = scene.add
+            .text(0, 0, minionIcon)
+            .setFontSize(16)
+            .setAlign("center")
+            .setOrigin(0.5, 0.5);
 
-    minionGroup.add(group);
-    const body = group.body as Phaser.Physics.Arcade.Body;
+        minionGroup.add(this.gameObject);
+        this.body = this.gameObject.body as Phaser.Physics.Arcade.Body;
 
-    group.add(text);
+        this.gameObject.add(text);
 
-    body.setBounce(1).setCollideWorldBounds(true);
+        this.body.setBounce(0).setCollideWorldBounds(true);
 
-    group.setScale(1);
+        this.gameObject.setScale(1);
 
-    const debug = scene.add.graphics().setDepth(99000);
+        this.debug = scene.add.graphics().setDepth(99000);
 
-    // scene.events.on("postupdate", () => {
-    //     debug.clear();
-    //     debug.lineStyle(1, 0xff0000, 1);
-    //     debug.lineBetween(group.x, group.y, target.x, target.y);
-    // });
+        scene.events.on("postupdate", () => {
+            this.debug.clear();
+            this.debug.lineStyle(1, 0xff0000, 1);
+            this.debug.lineBetween(this.gameObject.x, this.gameObject.y, this.target.x, this.target.y);
+            // console.log(this.body.velocity.length());
+        });
+    }
 
-    const setTarget = (cell: Cell) => {
-        target = cell;
-        const dv = new Phaser.Math.Vector2(target.x - group.x, target.y - group.y)
+    setTarget(cell: Cell) {
+        this.target = cell;
+        const dv = new Phaser.Math.Vector2(
+            this.target.x - this.gameObject.x,
+            this.target.y - this.gameObject.y
+        )
             .normalize()
-            .scale(velocity);
-        body.setVelocity(dv.x, dv.y);
-    };
+            .scale(this.velocity);
+        this.body.setVelocity(dv.x, dv.y);
+    }
 
-    const isAtTarget = () => {
-        // console.log(Math.sqrt((body.x - target.x) ** 2 + (body.y - target.y) ** 2));
+    isAtTarget() {
         return (
             Math.sqrt(
-                (group.x - target.x) * (group.x - target.x) +
-                    (group.y - target.y) * (group.y - target.y)
+                (this.gameObject.x - this.target.x) *
+                    (this.gameObject.x - this.target.x) +
+                    (this.gameObject.y - this.target.y) *
+                        (this.gameObject.y - this.target.y)
             ) < ARRIVED_THRESHOLD
         );
-    };
-
-    return {
-        gameObject: group,
-        setTarget,
-        isAtTarget
-    };
-};
+    }
+}

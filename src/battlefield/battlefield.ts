@@ -1,4 +1,4 @@
-import { makeMinion, Minion } from "./minion";
+import { Minion } from "./minion";
 import { makeTower, Tower } from "./tower";
 import { BattlefieldConfig, BattlefieldDisplay } from "./types";
 import { PathGrid } from "./pathGrid";
@@ -76,8 +76,17 @@ export class Battlefield {
                 .setOrigin(0, 0),
         ]);
 
-        scene.physics.add.collider(this.minionGroup, this.towerGroup);
-        scene.physics.add.collider(this.minionGroup, wallGroup);
+        const rerouteMinion = (minion: any, _: any) => {
+            const minClass = this.units.find((m) => m.gameObject === minion);
+            if (minClass) this.rerouteMinion(minClass);
+        };
+
+        scene.physics.add.collider(
+            this.minionGroup,
+            this.towerGroup,
+            rerouteMinion
+        );
+        scene.physics.add.collider(this.minionGroup, wallGroup, rerouteMinion);
         scene.physics.add.collider(
             this.projectileGroup,
             wallGroup,
@@ -99,24 +108,27 @@ export class Battlefield {
         this.debug = scene.add.graphics().setDepth(99000);
     }
 
-    spawnMinions() {
-        for (let i = 0; i < 3; i++) {
-            const minion = makeMinion(
+    rerouteMinion(minion: Minion) {
+        const cell = this.getCell(minion.gameObject.x, minion.gameObject.y);
+        minion.setTarget(cell.next);
+    }
+
+    spawnMinions(num: number = 3) {
+        for (let i = 0; i < num; i++) {
+            const spawnPoint =
+                this.config.spawnPoints[i % this.config.spawnPoints.length];
+            const cell = this.pathGrid.grid[spawnPoint[0]][spawnPoint[1]];
+
+            const minion = new Minion(
                 this.scene,
                 this.minionGroup,
                 this.display.minionIcon,
-                this.config.x + this.config.width / 2,
-                this.config.y + this.config.height / 2,
+                cell.x,
+                cell.y,
                 100
             );
-            const cell =
-                this.pathGrid.grid[
-                    Math.floor(Math.random() * this.pathGrid.size)
-                ][Math.floor(Math.random() * this.pathGrid.size)];
             this.units.push(minion);
             minion.setTarget(cell);
-
-            console.log(cell);
         }
     }
 
@@ -137,67 +149,80 @@ export class Battlefield {
         );
         this.towers.push(tower);
         this.towerGroup.add(tower.gameObject);
+
+        this.pathGrid.blockCell(x, y);
+    }
+
+    getCell(x: number, y: number) {
+        const row = Math.floor((y - this.config.y) / this.config.squareSize);
+        const col = Math.floor((x - this.config.x) / this.config.squareSize);
+        // console.log(
+        //     x,
+        //     y,
+        //     'pos is cell',
+        //     x - this.config.x,
+        //     y - this.config.y,
+        //     "is on cell",
+        //     col,
+        //     row,
+        //     this.pathGrid.grid[row][col]
+        // );
+        return this.pathGrid.grid[row][col];
     }
 
     update() {
         // Get closest minion for each tower. Has to be within range
-        // this.towers.forEach((tower) => {
-        //     let closestDist = tower.range;
-        //     let closestMinion: Minion | null = null;
+        this.towers.forEach((tower) => {
+            let closestDist = tower.range;
+            let closestMinion: Minion | null = null;
 
-        //     this.units.forEach((minion) => {
-        //         const dist = tower.gameObject
-        //             .getWorldPoint()
-        //             .distance(minion.gameObject.getWorldPoint());
-        //         if (dist < closestDist) {
-        //             closestDist = dist;
-        //             closestMinion = minion;
-        //         }
-        //     });
+            this.units.forEach((minion) => {
+                const dist = tower.gameObject
+                    .getWorldPoint()
+                    .distance(minion.gameObject.getWorldPoint());
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestMinion = minion;
+                }
+            });
 
-        //     if (closestMinion == null) {
-        //         tower.stopTracking();
-        //     } else {
-        //         // @ts-ignore dumbass
-        //         tower.setLookAt(closestMinion.gameObject);
+            if (closestMinion == null) {
+                tower.stopTracking();
+            } else {
+                // @ts-ignore dumbass
+                tower.setLookAt(closestMinion.gameObject);
 
-        //         if (
-        //             tower.lastFired + tower.fireDelayTime <=
-        //             this.scene.time.now
-        //         ) {
-        //             tower.lastFired = this.scene.time.now;
-        //             // Shoot
-        //             this.shoot(tower, closestMinion);
-        //         }
-        //     }
-        // });
+                // if (
+                //     tower.lastFired + tower.fireDelayTime <=
+                //     this.scene.time.now
+                // ) {
+                //     tower.lastFired = this.scene.time.now;
+                //     // Shoot
+                //     this.shoot(tower, closestMinion);
+                // }
+            }
+        });
 
         this.units.forEach((minion) => {
             if (minion.isAtTarget()) {
-                console.log("arrived");
-                minion.setTarget(
-                    this.pathGrid.grid[
-                        Math.floor(Math.random() * this.pathGrid.size)
-                    ][Math.floor(Math.random() * this.pathGrid.size)]
-                );
+                minion.setTarget(minion.target.next);
             }
         });
 
         if (DEBUG) {
             this.debug.clear();
-            this.debug.lineStyle(1, 0xff0000, 1);
-            // for (let i = 0; i < this.pathGrid.size; i++) {
-            //     for (let j = 0; j < this.pathGrid.size; j++) {
-            //         for (const [x, y] of this.pathGrid.grid[i][j].to) {
-            //             this.debug.lineBetween(
-            //                 this.config.x + (i + 0.5) * 20,
-            //                 this.config.y + (j + 0.5) * 20,
-            //                 this.config.x + (x + 0.5) * 20,
-            //                 this.config.y + (y + 0.5) * 20
-            //             );
-            //         }
-            //     }
-            // }
+            this.debug.lineStyle(1, 0x00ff00, 1);
+            for (let i = 0; i < this.pathGrid.size; i++) {
+                for (let j = 0; j < this.pathGrid.size; j++) {
+                    if (i == this.pathGrid.base[0] && j == this.pathGrid.base[1]) {
+                        continue;
+                    }
+                    const cell = this.pathGrid.grid[i][j];
+                    for (const dest of cell.to) {
+                        this.debug.lineBetween(cell.x, cell.y, dest.x, dest.y);
+                    }
+                }
+            }
         }
     }
 
