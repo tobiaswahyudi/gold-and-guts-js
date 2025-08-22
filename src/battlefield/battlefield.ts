@@ -250,7 +250,7 @@ export class Battlefield {
             towerPos.x,
             towerPos.y,
             minionPos.subtract(towerPos).normalize(),
-            150
+            200
         );
     }
 
