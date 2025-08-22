@@ -102,7 +102,7 @@ export class PathGrid {
             const nx = x + dx;
             const ny = y + dy;
             if (this.inBounds(nx, ny)) {
-                this.grid[ny][nx].weight = 1.5;
+                this.grid[ny][nx].weight *= 1.5;
             }
         }
 
