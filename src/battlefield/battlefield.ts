@@ -108,7 +108,7 @@ export class Battlefield {
             }
         );
 
-        const { group: base } = makeStructure(scene, config, display.baseIcon, config.base[0], config.base[1]);
+        const { group: base } = makeStructure(scene, config, display.baseIcon, config.base[0], config.base[1], 0x222222, 0.0);
         scene.physics.add.existing(base, true);
 
         scene.physics.add.collider(

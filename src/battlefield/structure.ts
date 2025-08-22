@@ -7,7 +7,9 @@ export const makeStructure = (
     fieldConfig: BattlefieldConfig,
     icon: string,
     fieldX: number,
-    fieldY: number
+    fieldY: number,
+    backgroundColor: number = 0x222222,
+    backgroundAlpha: number = 1
 ) => {
     const cx = fieldConfig.x + (fieldX + 0.5) * fieldConfig.squareSize;
     const cy = fieldConfig.y + (fieldY + 0.5) * fieldConfig.squareSize;
@@ -20,8 +22,8 @@ export const makeStructure = (
         0,
         fieldConfig.squareSize,
         fieldConfig.squareSize,
-        0x222222,
-        1
+        backgroundColor,
+        backgroundAlpha
     ).setOrigin(0.5, 0.5).setScale(0.9);
     const text = scene.add
         .text(0, 0, icon)
