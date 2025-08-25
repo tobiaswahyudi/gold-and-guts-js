@@ -118,7 +118,7 @@ export class Battlefield {
                 // console.log("minion hit base", minion, base);
                 this.deleteMinion(minion as Phaser.Types.Physics.Arcade.GameObjectWithBody);
                 this.units.filter((m) => m.gameObject !== minion);
-                this.spawnMinions(2);
+                this.spawnMinions(1);
             }
         );
 
