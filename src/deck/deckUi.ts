@@ -25,12 +25,15 @@ export class DeckUI {
     cards: CardDisplay[];
     hoveredCardIndex: number;
     draggedCardIndex: number;
+    playCard: (card: Card) => void;
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, playCard: (card: Card) => void) {
         this.scene = scene;
         this.cards = [];
         this.hoveredCardIndex = -1;
         this.draggedCardIndex = -1;
+
+        this.playCard = playCard;
     }
 
     addCard(card: Card) {
@@ -60,6 +63,7 @@ export class DeckUI {
             console.log("pointer down deleted", this.cards.length);
             cardDisplay.gameObject.destroy();
             this.arrangeCards();
+            this.playCard(card);
         });
 
         this.arrangeCards();
@@ -74,7 +78,7 @@ export class DeckUI {
         let arcDeg = -handTotalArcDeg / 2;
 
         const ARC_CENTER = {
-            x: this.scene.scale.width / 2,
+            x: 512,
             y: 540 + CARD_ARC_RADIUS,
         };
 

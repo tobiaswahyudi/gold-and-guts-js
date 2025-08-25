@@ -35,8 +35,6 @@ export class Play extends Phaser.Scene {
         super({
             key: "Play",
         });
-
-        this.deck = new Deck(this);
     }
 
     // hoverCard(cardIndex: number) {
@@ -55,6 +53,8 @@ export class Play extends Phaser.Scene {
 
     create() {
         this.graphics = this.add.graphics().setDepth(1000);
+
+        this.deck = new Deck(this);
 
         this.setupBattlefields();
         this.setupResourcesUi();
@@ -357,6 +357,8 @@ export class Play extends Phaser.Scene {
 
     update() {
         this.graphics.clear();
+
+        this.deck.update();
 
         this.defenseBattlefield.update();
         this.attackBattlefield.update();
