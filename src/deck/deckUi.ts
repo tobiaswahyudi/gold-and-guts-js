@@ -58,9 +58,7 @@ export class DeckUI {
 
         cardDisplay.rectangle.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.hoveredCardIndex = -1;
-            console.log("pointer down", this.cards.length);
             this.cards = this.cards.filter((c) => c.gameObject !== cardDisplay.gameObject);
-            console.log("pointer down deleted", this.cards.length);
             cardDisplay.gameObject.destroy();
             this.arrangeCards();
             this.playCard(card);

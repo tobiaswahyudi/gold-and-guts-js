@@ -85,7 +85,7 @@ export class Play extends Phaser.Scene {
 
     enemyAction() {
         const action = Math.random() > 0.5 ? "spawn" : "attack";
-        console.log("enemy action", action);
+        // console.log("enemy action", action);
         if (action === "spawn") {
             this.defenseBattlefield.spawnMinions();
         } else {

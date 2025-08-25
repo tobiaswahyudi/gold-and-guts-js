@@ -112,7 +112,7 @@ export class PathGrid {
     }
 
     recompute() {
-        console.log("recomputing");
+        // console.log("recomputing");
 
         this.grid.forEach((row) => {
             row.forEach((cell) => {

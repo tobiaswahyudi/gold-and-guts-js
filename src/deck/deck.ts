@@ -132,12 +132,12 @@ export class Deck {
 
         let y = 32;
 
-        console.log(
-            "updateDeckList",
-            this.hand.length,
-            this.drawPile.length,
-            this.discardPile.length
-        );
+        // console.log(
+        //     "updateDeckList",
+        //     this.hand.length,
+        //     this.drawPile.length,
+        //     this.discardPile.length
+        // );
 
         this.hand.forEach((card) => {
             const item = this.deckList.get(card.id);
