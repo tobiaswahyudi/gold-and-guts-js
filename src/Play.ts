@@ -1,7 +1,5 @@
-import { createCard } from "./createCard";
-import { Battlefield } from "./battlefield/battlefield";
 import Phaser from "phaser";
-import { Card } from "./createCard";
+
 import {
     ATTACK_FIELD_CONFIG,
     ATTACK_FIELD_DISPLAY,
@@ -9,13 +7,16 @@ import {
     DEFENSE_FIELD_DISPLAY,
 } from "./battlefield/constants";
 
+import { Battlefield } from "./battlefield/battlefield";
+import { Deck } from "./deck/deck";
+
 export class Play extends Phaser.Scene {
     graphics: Phaser.GameObjects.Graphics;
 
-    cards: Card[] = [];
+    deck: Deck;
 
     hoveredCardIndex = -1;
-    draggedCard: Card | null = null;
+    // draggedCard: Card | null = null;
     draggedCardIsAttack: boolean = false;
     dragStartPosition = { x: 0, y: 0 };
 
@@ -34,18 +35,19 @@ export class Play extends Phaser.Scene {
         super({
             key: "Play",
         });
+
+        this.deck = new Deck(this);
     }
 
-    hoverCard(cardIndex: number) {
-        if (this.draggedCard !== null) return false;
-        this.hoveredCardIndex = cardIndex;
-        this.arrangeCards();
-        return true;
-    }
+    // hoverCard(cardIndex: number) {
+    //     if (this.draggedCard !== null) return false;
+    //     this.hoveredCardIndex = cardIndex;
+    //     return true;
+    // }
 
-    dragCard(cardIndex: number) {
-        this.draggedCard = this.cards[cardIndex];
-    }
+    // dragCard(cardIndex: number) {
+    //     this.draggedCard = this.cards[cardIndex];
+    // }
 
     init() {
         this.cameras.main.fadeIn(500);
@@ -58,8 +60,19 @@ export class Play extends Phaser.Scene {
         this.setupResourcesUi();
         this.setupCards();
 
-        this.setupListeners();
+        // this.setupListeners();
         this.setupEnemyAction();
+
+        this.defenseField.on(
+            "pointerdown",
+            (pointer: Phaser.Input.Pointer, x: number, y: number) => {
+                // this.defenseFieldHoveredTile = {
+                //     x: Math.floor(x / 20),
+                //     y: Math.floor(y / 20),
+                // };
+                this.deck.addCard();
+            }
+        );
     }
 
     setupEnemyAction() {
@@ -232,188 +245,115 @@ export class Play extends Phaser.Scene {
     }
 
     setupCards() {
-        this.addCard();
-        this.addCard();
-        this.addCard();
-        this.addCard();
-        this.addCard();
-
-        this.arrangeCards();
+        // this.deck.addCard();
+        // this.deck.addCard();
+        // this.deck.addCard();
+        // this.deck.addCard();
+        // this.deck.addCard();
     }
 
-    handleCardDrag(
-        pointer: any,
-        _gameObject: any,
-        dragX: number,
-        dragY: number
-    ) {
-        this.dragCard(this.hoveredCardIndex);
-        const card = this.draggedCard!.gameObject;
-        this.draggedCardIsAttack = card.getData("cardTarget") === "attack";
+    // handleCardDrag(
+    //     pointer: any,
+    //     _gameObject: any,
+    //     dragX: number,
+    //     dragY: number
+    // ) {
+    //     this.dragCard(this.hoveredCardIndex);
+    //     const card = this.draggedCard!.gameObject;
+    //     this.draggedCardIsAttack = card.getData("cardTarget") === "attack";
 
-        const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
-        let arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
+    //     const arrowTail = new Phaser.Math.Vector2(card.x, card.y - 100);
+    //     let arrowHead = new Phaser.Math.Vector2(pointer.x, pointer.y);
 
-        if (this.draggedCardIsAttack && this.isAttackFieldHovered) {
-            arrowHead = new Phaser.Math.Vector2(
-                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width / 2,
-                ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height / 2
-            );
-        }
+    //     if (this.draggedCardIsAttack && this.isAttackFieldHovered) {
+    //         arrowHead = new Phaser.Math.Vector2(
+    //             ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width / 2,
+    //             ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height / 2
+    //         );
+    //     }
 
-        if (!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
-            arrowHead = new Phaser.Math.Vector2(
-                DEFENSE_FIELD_CONFIG.x +
-                    DEFENSE_FIELD_CONFIG.squareSize *
-                        this.defenseFieldHoveredTile.x +
-                    10,
-                DEFENSE_FIELD_CONFIG.y +
-                    DEFENSE_FIELD_CONFIG.squareSize *
-                        this.defenseFieldHoveredTile.y +
-                    10
-            );
-        }
+    //     if (!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
+    //         arrowHead = new Phaser.Math.Vector2(
+    //             DEFENSE_FIELD_CONFIG.x +
+    //                 DEFENSE_FIELD_CONFIG.squareSize *
+    //                     this.defenseFieldHoveredTile.x +
+    //                 10,
+    //             DEFENSE_FIELD_CONFIG.y +
+    //                 DEFENSE_FIELD_CONFIG.squareSize *
+    //                     this.defenseFieldHoveredTile.y +
+    //                 10
+    //         );
+    //     }
 
-        const dragDistance = arrowHead.distance(arrowTail);
+    //     const dragDistance = arrowHead.distance(arrowTail);
 
-        const controlPointDistance = Math.min(
-            (dragDistance * dragDistance) / 150,
-            150
-        );
-        const controlPoint = new Phaser.Math.Vector2(0, -controlPointDistance);
+    //     const controlPointDistance = Math.min(
+    //         (dragDistance * dragDistance) / 150,
+    //         150
+    //     );
+    //     const controlPoint = new Phaser.Math.Vector2(0, -controlPointDistance);
 
-        this.dragArrow = new Phaser.Curves.QuadraticBezier(
-            arrowTail,
-            arrowTail.clone().add(controlPoint),
-            arrowHead
-        );
-    }
+    //     this.dragArrow = new Phaser.Curves.QuadraticBezier(
+    //         arrowTail,
+    //         arrowTail.clone().add(controlPoint),
+    //         arrowHead
+    //     );
+    // }
 
-    handleCardDragEnd() {
-        if (this.draggedCard === null) return;
-        const card = this.draggedCard.gameObject;
+    // handleCardDragEnd() {
+    //     if (this.draggedCard === null) return;
+    //     const card = this.draggedCard.gameObject;
 
-        if (this.draggedCardIsAttack && this.isAttackFieldHovered) {
-            this.attackBattlefield.spawnMinions();
+    //     if (this.draggedCardIsAttack && this.isAttackFieldHovered) {
+    //         this.attackBattlefield.spawnMinions();
 
-            card.destroy();
-            this.cards = this.cards.filter((c) => c.gameObject !== card);
+    //         card.destroy();
+    //         this.cards = this.cards.filter((c) => c.gameObject !== card);
 
-            this.addCard();
-        }
-        if (!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
-            this.defenseBattlefield.spawnTower(
-                this.defenseFieldHoveredTile.x,
-                this.defenseFieldHoveredTile.y
-            );
+    //         this.addCard();
+    //     }
+    //     if (!this.draggedCardIsAttack && this.defenseFieldHoveredTile) {
+    //         this.defenseBattlefield.spawnTower(
+    //             this.defenseFieldHoveredTile.x,
+    //             this.defenseFieldHoveredTile.y
+    //         );
 
-            card.destroy();
-            this.cards = this.cards.filter((c) => c.gameObject !== card);
+    //         card.destroy();
+    //         this.cards = this.cards.filter((c) => c.gameObject !== card);
 
-            this.addCard();
-        }
+    //         this.addCard();
+    //     }
 
-        this.draggedCard = null;
-        this.hoveredCardIndex = -1;
-        this.arrangeCards();
-        this.dragArrow = null;
-    }
+    //     this.draggedCard = null;
+    //     this.hoveredCardIndex = -1;
+    //     this.arrangeCards();
+    //     this.dragArrow = null;
+    // }
 
-    setupListeners() {
-        this.input.on("drag", this.handleCardDrag.bind(this));
-        this.input.on("dragend", this.handleCardDragEnd.bind(this));
+    // setupListeners() {
+    //     this.input.on("drag", this.handleCardDrag.bind(this));
+    //     this.input.on("dragend", this.handleCardDragEnd.bind(this));
 
-        this.attackField.on("pointerover", () => {
-            this.isAttackFieldHovered = true;
-        });
-        this.attackField.on("pointerout", () => {
-            this.isAttackFieldHovered = false;
-        });
+    //     this.attackField.on("pointerover", () => {
+    //         this.isAttackFieldHovered = true;
+    //     });
+    //     this.attackField.on("pointerout", () => {
+    //         this.isAttackFieldHovered = false;
+    //     });
 
-        this.defenseField.on(
-            "pointermove",
-            (pointer: Phaser.Input.Pointer, x: number, y: number) => {
-                this.defenseFieldHoveredTile = {
-                    x: Math.floor(x / 20),
-                    y: Math.floor(y / 20),
-                };
-            }
-        );
-        this.defenseField.on("pointerout", () => {
-            this.defenseFieldHoveredTile = null;
-        });
-    }
-
-    addCard() {
-        const cardTarget = Math.random() > 0.5 ? "attack" : "defense";
-        let cardName = "";
-        let cardImage = "";
-        let cardDescription = "";
-
-        if (cardTarget === "attack") {
-            cardName = "Minion A ×3";
-            cardImage = "💂‍♂️";
-            cardDescription =
-                "Spawns 3 minions. They attack the enemy base. They are not very strong.";
-        } else {
-            cardName = "Tower A";
-            cardImage = "🏹";
-            cardDescription =
-                "Builds a tower. It defends your base. It is not very strong.";
-        }
-
-        this.cards.push(
-            createCard({
-                scene: this,
-                x: 150,
-                y: 540,
-                selectCard: this.hoverCard.bind(this),
-                cardName,
-                cardImage,
-                cardDescription,
-                cardTarget,
-            })
-        );
-    }
-
-    arrangeCards() {
-        const cardCount = this.cards.length;
-        const middle = (cardCount - 1) / 2;
-
-        const arcDeg = Math.PI * (3 / 180);
-        const arcRadius = 2000;
-
-        const ARC_CENTER = {
-            x: this.scene.systems.scale.width / 2,
-            y: 540 + arcRadius,
-        };
-
-        const SHIMMY_OVER = 40;
-
-        this.cards.forEach(({ control, gameObject }, index) => {
-            const angle = (index - middle) * arcDeg;
-
-            let shimmyOver = 0;
-
-            if (
-                this.hoveredCardIndex != -1 &&
-                this.hoveredCardIndex !== index
-            ) {
-                shimmyOver =
-                    this.hoveredCardIndex < index ? SHIMMY_OVER : -SHIMMY_OVER;
-            }
-
-            const x = ARC_CENTER.x + Math.sin(angle) * arcRadius + shimmyOver;
-            const y = ARC_CENTER.y - Math.cos(angle) * arcRadius;
-
-            control.x = x;
-            control.y = y;
-            control.cardIndex = index;
-
-            gameObject.setPosition(x, y);
-            gameObject.setRotation(angle);
-        });
-    }
+    //     this.defenseField.on(
+    //         "pointermove",
+    //         (pointer: Phaser.Input.Pointer, x: number, y: number) => {
+    //             this.defenseFieldHoveredTile = {
+    //                 x: Math.floor(x / 20),
+    //                 y: Math.floor(y / 20),
+    //             };
+    //         }
+    //     );
+    //     this.defenseField.on("pointerout", () => {
+    //         this.defenseFieldHoveredTile = null;
+    //     });
+    // }
 
     update() {
         this.graphics.clear();
@@ -443,7 +383,7 @@ export class Play extends Phaser.Scene {
 
             // should also have card
 
-            const card = this.draggedCard!.gameObject;
+            // const card = this.draggedCard!.gameObject;
 
             const polygonPoints = this.draggedCardIsAttack
                 ? [
