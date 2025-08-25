@@ -1,5 +1,6 @@
 import { Card } from "./types";
 import { DeckUI } from "./deckUi";
+import { generateId } from "../utils/id";
 
 /**
  * Manages the display & logic of the card deck.
@@ -44,7 +45,7 @@ export class Deck {
         }
 
         this.deckUi.addCard({
-            id: "hgawkuhdkjadkakdbakd",
+            id: generateId(),
             cardName,
             cardImage,
             cardDescription,
