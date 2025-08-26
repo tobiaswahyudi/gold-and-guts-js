@@ -13,8 +13,6 @@ export class UIControl {
 
     managers: StateManagers;
 
-    dragStartPosition = { x: 0, y: 0 };
-
     dragArrow: Phaser.Curves.Curve | null = null;
 
     battlefieldUi: BattlefieldUI;
@@ -33,7 +31,11 @@ export class UIControl {
             defenseAction: this.playDefenseCard.bind(this),
         };
 
-        this.battlefieldUi = new BattlefieldUI(scene, managers, battlefieldUiHandlers);
+        this.battlefieldUi = new BattlefieldUI(
+            scene,
+            managers,
+            battlefieldUiHandlers
+        );
 
         const handUiHandlers: HandUIHandlers = {
             dragCard: this.flagDragCard.bind(this),
@@ -53,9 +55,14 @@ export class UIControl {
             const card = managers.deck.addCard();
             this.handUi.addCard(card);
         });
+
+        this.scene.input.on(
+            Phaser.Input.Events.POINTER_UP,
+            this.handUi.endDragCard.bind(this.handUi)
+        );
     }
 
-    playDefenseCard(coords: {x: number, y: number}) {
+    playDefenseCard(coords: { x: number; y: number }) {
         this.managers.deck.playCard(this.handUi.draggedCard!);
         this.managers.defenseBattlefield.spawnTower(coords.x, coords.y);
         this.handUi.playCard();

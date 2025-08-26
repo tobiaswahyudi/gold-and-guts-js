@@ -77,18 +77,25 @@ export class BattlefieldUI {
             this.defenseFieldHoveredTile = null;
         });
 
-        this.attackField.on("pointerup", () => {
-            if(this.draggedCardTarget === "attack") {
-                console.log("attack action");
+        const attackDrop = () => {
+            if(this.draggedCardTarget === "attack" && this.isAttackFieldHovered) {
+                // console.log("attack action");
                 this.handlers.attackAction();
             }
-        });
-        this.defenseField.on("pointerup", () => {
-            if(this.draggedCardTarget === "defense") {
-                console.log("defense action", this.defenseFieldHoveredTile);
+        }
+
+        this.attackField.on("pointerup", attackDrop);
+        this.scene.input.on(Phaser.Input.Events.DRAG_END, attackDrop);
+
+        const defenseDrop = () => {
+            if(this.draggedCardTarget === "defense" && this.defenseFieldHoveredTile) {
+                // console.log("defense action", this.defenseFieldHoveredTile);
                 this.handlers.defenseAction(this.defenseFieldHoveredTile!);
             }
-        });
+        }
+
+        this.defenseField.on("pointerup", defenseDrop);
+        this.scene.input.on(Phaser.Input.Events.DRAG_END, defenseDrop);
     }
 
     setupBattlefields() {
