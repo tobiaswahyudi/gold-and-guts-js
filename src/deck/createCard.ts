@@ -42,7 +42,8 @@ export const createDisplayCard = ({
         .rectangle(0, 0, cardWidth, cardHeight)
         .setFillStyle(color.color)
         .setStrokeStyle(2, color.darken(30).color, 1)
-        .setInteractive({ draggable: true });
+        .setInteractive({ draggable: true })
+        .setRounded(2);
 
     cardGroup.add(cardRectangle);
 
