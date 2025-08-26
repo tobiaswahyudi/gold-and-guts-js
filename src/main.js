@@ -5,7 +5,7 @@ import Phaser from "phaser";
 const config = {
     title: "Gold and Guts",
     type: Phaser.AUTO,
-    width: 1024,
+    width: 1200,
     height: 640,
     parent: "game-container",
     backgroundColor: "#141414",
