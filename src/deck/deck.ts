@@ -1,5 +1,4 @@
 import { Card, CardFieldTarget } from "./types";
-import { DeckUI } from "./deckUi";
 import { generateId } from "../utils/id";
 
 const DEBUG = true;
@@ -55,8 +54,6 @@ export class Deck {
     discardPile: Card[];
     hand: Card[];
 
-    deckUi: DeckUI;
-
     deckList: Map<string, DeckListItem>;
     deckListGraphics: Phaser.GameObjects.Graphics;
 
@@ -66,8 +63,6 @@ export class Deck {
         this.drawPile = [];
         this.discardPile = [];
         this.hand = [];
-
-        this.deckUi = new DeckUI(scene, this.playCard.bind(this));
 
         this.deckListGraphics = scene.add.graphics().setDepth(99000);
         this.deckList = new Map();
@@ -97,27 +92,25 @@ export class Deck {
                 "Builds a tower. It defends your base. It is not very strong.";
         }
 
-        const card = {
+        const card: Card = {
             id: generateId(),
             cardName,
             cardImage,
             cardDescription,
             cardTarget,
+            goldCost: 1,
+            gutsCost: 1,
+            cardType: "minion",
         };
 
         this.fullDeck.push(card);
-        // this.drawPile.push(card);
-        this.deckUi.addCard(card);
-
-        if (Math.random() > 0.5) {
-            this.drawPile.push(card);
-        } else {
-            this.hand.push(card);
-        }
+        this.hand.push(card);
 
         this.deckList.set(card.id, deckListItem(this.scene, card.cardName));
 
         this.updateDeckList();
+
+        return card;
     }
 
     playCard(card: Card) {

@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Card } from "./types";
+import { LAYERS } from "../utils/layers";
 
 type CardDisplayParams = {
     scene: Phaser.Scene;
@@ -35,7 +36,7 @@ export const createDisplayCard = ({
     const cardGroup = scene.add
         .container(x, y)
         .setSize(cardWidth, cardHeight)
-        .setDepth(2000);
+        .setDepth(LAYERS.HAND);
 
     const cardRectangle = scene.add
         .rectangle(0, 0, cardWidth, cardHeight)
@@ -88,5 +89,6 @@ export const createDisplayCard = ({
     return {
         gameObject: cardGroup,
         rectangle: cardRectangle,
+        card,
     };
 };

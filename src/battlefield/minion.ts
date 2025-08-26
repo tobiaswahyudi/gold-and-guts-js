@@ -1,3 +1,4 @@
+import { LAYERS } from "../utils/layers";
 import { Cell } from "./pathGrid";
 
 const DEBUG = false;
@@ -22,7 +23,10 @@ export class Minion {
     ) {
         this.scene = scene;
         this.velocity = velocity;
-        this.gameObject = scene.add.container(x, y).setSize(20, 20);
+        this.gameObject = scene.add
+            .container(x, y)
+            .setSize(20, 20)
+            .setDepth(LAYERS.BATTLEFIELD_UNITS);
         const text = scene.add
             .text(0, 0, minionIcon)
             .setFontSize(16)
@@ -44,7 +48,12 @@ export class Minion {
             if (DEBUG) {
                 this.debug.clear();
                 this.debug.lineStyle(1, 0xff0000, 1);
-                this.debug.lineBetween(this.gameObject.x, this.gameObject.y, this.target.x, this.target.y);
+                this.debug.lineBetween(
+                    this.gameObject.x,
+                    this.gameObject.y,
+                    this.target.x,
+                    this.target.y
+                );
             }
             // console.log(this.body.velocity.length());
         });
@@ -52,6 +61,11 @@ export class Minion {
 
     setTarget(cell: Cell) {
         this.target = cell;
+        if(!this.target) {
+            console.error("minion has no target");
+            return;
+        }
+
         const dv = new Phaser.Math.Vector2(
             this.target.x - this.gameObject.x,
             this.target.y - this.gameObject.y

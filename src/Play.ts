@@ -9,24 +9,14 @@ import {
 
 import { Battlefield } from "./battlefield/battlefield";
 import { Deck } from "./deck/deck";
+import { UIControl } from "./ui/uiControl";
 
 export class Play extends Phaser.Scene {
     graphics: Phaser.GameObjects.Graphics;
 
     deck: Deck;
 
-    hoveredCardIndex = -1;
-    // draggedCard: Card | null = null;
-    draggedCardIsAttack: boolean = false;
-    dragStartPosition = { x: 0, y: 0 };
-
-    isAttackFieldHovered = false;
-    defenseFieldHoveredTile: { x: number; y: number } | null = null;
-
-    attackField: Phaser.GameObjects.Grid;
-    defenseField: Phaser.GameObjects.Grid;
-
-    dragArrow: Phaser.Curves.Curve | null = null;
+    uiControl: UIControl;
 
     attackBattlefield: Battlefield;
     defenseBattlefield: Battlefield;
@@ -55,24 +45,31 @@ export class Play extends Phaser.Scene {
         this.graphics = this.add.graphics().setDepth(1000);
 
         this.deck = new Deck(this);
+        this.attackBattlefield = new Battlefield(
+            this,
+            ATTACK_FIELD_CONFIG,
+            ATTACK_FIELD_DISPLAY
+        );
 
-        this.setupBattlefields();
+        this.defenseBattlefield = new Battlefield(
+            this,
+            DEFENSE_FIELD_CONFIG,
+            DEFENSE_FIELD_DISPLAY
+        );
+
+        const managers = {
+            deck: this.deck,
+            attackBattlefield: this.attackBattlefield,
+            defenseBattlefield: this.defenseBattlefield,
+        };
+
+        this.uiControl = new UIControl(this, managers);
+
         this.setupResourcesUi();
         this.setupCards();
 
         // this.setupListeners();
         this.setupEnemyAction();
-
-        this.defenseField.on(
-            "pointerdown",
-            (pointer: Phaser.Input.Pointer, x: number, y: number) => {
-                // this.defenseFieldHoveredTile = {
-                //     x: Math.floor(x / 20),
-                //     y: Math.floor(y / 20),
-                // };
-                this.deck.addCard();
-            }
-        );
     }
 
     setupEnemyAction() {
@@ -89,125 +86,14 @@ export class Play extends Phaser.Scene {
         if (action === "spawn") {
             this.defenseBattlefield.spawnMinions();
         } else {
-            const randomRow = Math.floor(Math.random() * ATTACK_FIELD_CONFIG.gridSize);
-            const randomColumn = Math.floor(Math.random() * ATTACK_FIELD_CONFIG.gridSize);
+            const randomRow = Math.floor(
+                Math.random() * ATTACK_FIELD_CONFIG.gridSize
+            );
+            const randomColumn = Math.floor(
+                Math.random() * ATTACK_FIELD_CONFIG.gridSize
+            );
             this.attackBattlefield.spawnTower(randomRow, randomColumn);
         }
-    }
-
-    setupBattlefields() {
-        this.defenseField = this.add
-            .grid(
-                DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width / 2,
-                DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height / 2,
-                DEFENSE_FIELD_CONFIG.width,
-                DEFENSE_FIELD_CONFIG.height,
-                DEFENSE_FIELD_CONFIG.squareSize,
-                DEFENSE_FIELD_CONFIG.squareSize
-            )
-            .setFillStyle(0x6f947f)
-            .setAltFillStyle(0x698c78)
-            .setOutlineStyle()
-            .setInteractive();
-
-        this.attackField = this.add
-            .grid(
-                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width / 2,
-                ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height / 2,
-                ATTACK_FIELD_CONFIG.width,
-                ATTACK_FIELD_CONFIG.height,
-                ATTACK_FIELD_CONFIG.squareSize,
-                ATTACK_FIELD_CONFIG.squareSize
-            )
-            .setFillStyle(0xe0bfa7)
-            .setAltFillStyle(0xd6b6a0)
-            .setOutlineStyle()
-            .setInteractive();
-
-        const defendText = this.add
-            .text(
-                DEFENSE_FIELD_CONFIG.x,
-                DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height + 130,
-                "DEFEND DEFEND DEFEND DEFEND DEFEND",
-                {
-                    fontSize: 40,
-                    fontStyle: "bold",
-                    color: "#6f947f",
-                    fontFamily: "Alkhemikal",
-                }
-            )
-            .setResolution(2)
-            .setOrigin(0, 1)
-            .setRotation(-Math.PI / 2);
-
-        const defendTextMask = this.add
-            .rectangle(
-                DEFENSE_FIELD_CONFIG.x,
-                DEFENSE_FIELD_CONFIG.y,
-                40,
-                DEFENSE_FIELD_CONFIG.height
-            )
-            .setOrigin(1, 0)
-            .setFillStyle(0x000000)
-            .setVisible(false)
-            .createGeometryMask();
-        defendText.setMask(defendTextMask);
-
-        this.add.tween({
-            targets: defendText,
-            y: DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
-            duration: 6000,
-            repeat: -1,
-        });
-
-        const attackText = this.add
-            .text(
-                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
-                ATTACK_FIELD_CONFIG.y - 136,
-                "ATTACK ATTACK ATTACK ATTACK ATTACK",
-                {
-                    fontSize: 39,
-                    fontStyle: "bold",
-                    color: "#E0BFA7",
-                    fontFamily: "Alkhemikal",
-                }
-            )
-            .setResolution(2)
-            .setOrigin(0, 1)
-            .setRotation(Math.PI / 2);
-
-        const attackTextMask = this.add
-
-            .rectangle(
-                ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
-                ATTACK_FIELD_CONFIG.y,
-                40,
-                ATTACK_FIELD_CONFIG.height
-            )
-            .setOrigin(0, 0)
-            .setFillStyle(0x000000)
-            .setVisible(false)
-            .createGeometryMask();
-        attackText.setMask(attackTextMask);
-
-        this.add.tween({
-            targets: attackText,
-            y: ATTACK_FIELD_CONFIG.y,
-            duration: 6000,
-            repeat: -1,
-        });
-
-        this.attackBattlefield = new Battlefield(
-            this,
-            ATTACK_FIELD_CONFIG,
-            ATTACK_FIELD_DISPLAY
-        );
-
-        this.defenseBattlefield = new Battlefield(
-            this,
-            DEFENSE_FIELD_CONFIG,
-            DEFENSE_FIELD_DISPLAY
-        );
     }
 
     setupResourcesUi() {
@@ -356,116 +242,118 @@ export class Play extends Phaser.Scene {
     // }
 
     update() {
-        this.graphics.clear();
+        //     this.graphics.clear();
 
         this.deck.update();
 
         this.defenseBattlefield.update();
         this.attackBattlefield.update();
 
-        if (this.dragArrow) {
-            const ARROW_THICKNESS = 8;
+        this.uiControl.update();
 
-            this.graphics.lineStyle(ARROW_THICKNESS, 0x594a3e, 1);
-            this.dragArrow.draw(this.graphics);
+        //     if (this.dragArrow) {
+        //         const ARROW_THICKNESS = 8;
 
-            const tangentHead = this.dragArrow
-                .getTangentAt(1)
-                .scale(ARROW_THICKNESS * 3);
-            const head = this.dragArrow.getPointAt(1);
+        //         this.graphics.lineStyle(ARROW_THICKNESS, 0x594a3e, 1);
+        //         this.dragArrow.draw(this.graphics);
 
-            new Phaser.Curves.Line(
-                head,
-                head.clone().add(tangentHead.rotate(Math.PI * 0.85))
-            ).draw(this.graphics);
-            new Phaser.Curves.Line(
-                head,
-                head.clone().add(tangentHead.rotate(Math.PI * 0.3))
-            ).draw(this.graphics);
+        //         const tangentHead = this.dragArrow
+        //             .getTangentAt(1)
+        //             .scale(ARROW_THICKNESS * 3);
+        //         const head = this.dragArrow.getPointAt(1);
 
-            // should also have card
+        //         new Phaser.Curves.Line(
+        //             head,
+        //             head.clone().add(tangentHead.rotate(Math.PI * 0.85))
+        //         ).draw(this.graphics);
+        //         new Phaser.Curves.Line(
+        //             head,
+        //             head.clone().add(tangentHead.rotate(Math.PI * 0.3))
+        //         ).draw(this.graphics);
 
-            // const card = this.draggedCard!.gameObject;
+        //         // should also have card
 
-            const polygonPoints = this.draggedCardIsAttack
-                ? [
-                      0,
-                      0,
-                      ATTACK_FIELD_CONFIG.x,
-                      0,
-                      ATTACK_FIELD_CONFIG.x,
-                      ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height,
-                      ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
-                      ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height,
-                      ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
-                      ATTACK_FIELD_CONFIG.y,
-                      ATTACK_FIELD_CONFIG.x,
-                      ATTACK_FIELD_CONFIG.y,
-                      ATTACK_FIELD_CONFIG.x,
-                      0,
-                      this.scene.systems.scale.width,
-                      0,
-                      this.scene.systems.scale.width,
-                      this.scene.systems.scale.height,
-                      0,
-                      this.scene.systems.scale.height,
-                  ]
-                : [
-                      0,
-                      0,
-                      DEFENSE_FIELD_CONFIG.x,
-                      0,
-                      DEFENSE_FIELD_CONFIG.x,
-                      DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
-                      DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width,
-                      DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
-                      DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width,
-                      DEFENSE_FIELD_CONFIG.y,
-                      DEFENSE_FIELD_CONFIG.x,
-                      DEFENSE_FIELD_CONFIG.y,
-                      DEFENSE_FIELD_CONFIG.x,
-                      0,
-                      this.scene.systems.scale.width,
-                      0,
-                      this.scene.systems.scale.width,
-                      this.scene.systems.scale.height,
-                      0,
-                      this.scene.systems.scale.height,
-                  ];
+        //         // const card = this.draggedCard!.gameObject;
 
-            const polygonMask = new Phaser.Geom.Polygon(polygonPoints);
-            this.graphics.fillStyle(0x000000, 0.4);
-            this.graphics.fillPoints(polygonMask.points, true, true);
+        //         const polygonPoints = this.draggedCardIsAttack
+        //             ? [
+        //                   0,
+        //                   0,
+        //                   ATTACK_FIELD_CONFIG.x,
+        //                   0,
+        //                   ATTACK_FIELD_CONFIG.x,
+        //                   ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height,
+        //                   ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
+        //                   ATTACK_FIELD_CONFIG.y + ATTACK_FIELD_CONFIG.height,
+        //                   ATTACK_FIELD_CONFIG.x + ATTACK_FIELD_CONFIG.width,
+        //                   ATTACK_FIELD_CONFIG.y,
+        //                   ATTACK_FIELD_CONFIG.x,
+        //                   ATTACK_FIELD_CONFIG.y,
+        //                   ATTACK_FIELD_CONFIG.x,
+        //                   0,
+        //                   this.scene.systems.scale.width,
+        //                   0,
+        //                   this.scene.systems.scale.width,
+        //                   this.scene.systems.scale.height,
+        //                   0,
+        //                   this.scene.systems.scale.height,
+        //               ]
+        //             : [
+        //                   0,
+        //                   0,
+        //                   DEFENSE_FIELD_CONFIG.x,
+        //                   0,
+        //                   DEFENSE_FIELD_CONFIG.x,
+        //                   DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
+        //                   DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width,
+        //                   DEFENSE_FIELD_CONFIG.y + DEFENSE_FIELD_CONFIG.height,
+        //                   DEFENSE_FIELD_CONFIG.x + DEFENSE_FIELD_CONFIG.width,
+        //                   DEFENSE_FIELD_CONFIG.y,
+        //                   DEFENSE_FIELD_CONFIG.x,
+        //                   DEFENSE_FIELD_CONFIG.y,
+        //                   DEFENSE_FIELD_CONFIG.x,
+        //                   0,
+        //                   this.scene.systems.scale.width,
+        //                   0,
+        //                   this.scene.systems.scale.width,
+        //                   this.scene.systems.scale.height,
+        //                   0,
+        //                   this.scene.systems.scale.height,
+        //               ];
 
-            if (this.draggedCardIsAttack) {
-                if (this.isAttackFieldHovered) {
-                    this.graphics.fillStyle(0xffffff, 0.25);
-                    this.graphics.fillRectShape(
-                        new Phaser.Geom.Rectangle(
-                            ATTACK_FIELD_CONFIG.x,
-                            ATTACK_FIELD_CONFIG.y,
-                            ATTACK_FIELD_CONFIG.width,
-                            ATTACK_FIELD_CONFIG.height
-                        )
-                    );
-                }
-            } else {
-                if (this.defenseFieldHoveredTile) {
-                    this.graphics.fillStyle(0xffffff, 0.25);
-                    this.graphics.fillRectShape(
-                        new Phaser.Geom.Rectangle(
-                            DEFENSE_FIELD_CONFIG.x +
-                                this.defenseFieldHoveredTile.x *
-                                    DEFENSE_FIELD_CONFIG.squareSize,
-                            DEFENSE_FIELD_CONFIG.y +
-                                this.defenseFieldHoveredTile.y *
-                                    DEFENSE_FIELD_CONFIG.squareSize,
-                            20,
-                            20
-                        )
-                    );
-                }
-            }
-        }
+        //         const polygonMask = new Phaser.Geom.Polygon(polygonPoints);
+        //         this.graphics.fillStyle(0x000000, 0.4);
+        //         this.graphics.fillPoints(polygonMask.points, true, true);
+
+        //         if (this.draggedCardIsAttack) {
+        //             if (this.isAttackFieldHovered) {
+        //                 this.graphics.fillStyle(0xffffff, 0.25);
+        //                 this.graphics.fillRectShape(
+        //                     new Phaser.Geom.Rectangle(
+        //                         ATTACK_FIELD_CONFIG.x,
+        //                         ATTACK_FIELD_CONFIG.y,
+        //                         ATTACK_FIELD_CONFIG.width,
+        //                         ATTACK_FIELD_CONFIG.height
+        //                     )
+        //                 );
+        //             }
+        //         } else {
+        //             if (this.defenseFieldHoveredTile) {
+        //                 this.graphics.fillStyle(0xffffff, 0.25);
+        //                 this.graphics.fillRectShape(
+        //                     new Phaser.Geom.Rectangle(
+        //                         DEFENSE_FIELD_CONFIG.x +
+        //                             this.defenseFieldHoveredTile.x *
+        //                                 DEFENSE_FIELD_CONFIG.squareSize,
+        //                         DEFENSE_FIELD_CONFIG.y +
+        //                             this.defenseFieldHoveredTile.y *
+        //                                 DEFENSE_FIELD_CONFIG.squareSize,
+        //                         20,
+        //                         20
+        //                     )
+        //                 );
+        //             }
+        //         }
+        //     }
     }
 }

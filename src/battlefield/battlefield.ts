@@ -3,6 +3,7 @@ import { makeTower, Tower } from "./tower";
 import { BattlefieldConfig, BattlefieldDisplay } from "./types";
 import { PathGrid } from "./pathGrid";
 import { makeStructure } from "./structure";
+import { LAYERS } from "../utils/layers";
 
 const DEBUG = false;
 
@@ -127,6 +128,10 @@ export class Battlefield {
 
     rerouteMinion(minion: Minion) {
         const cell = this.getCell(minion.gameObject.x, minion.gameObject.y);
+        if(cell.blocked) {
+            console.error("MINION WAS AT BLOCKED CELL", cell)
+            return;
+        }
         minion.setTarget(cell.next);
     }
 
@@ -264,7 +269,8 @@ export class Battlefield {
             .text(x, y, "🪨")
             .setFontSize(16)
             .setAlign("center")
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5, 0.5)
+            .setDepth(LAYERS.BATTLEFIELD_PROJECTILES);
         this.projectileGroup.add(projectile);
         this.scene.physics.add.existing(projectile, true);
         const body = projectile.body as Phaser.Physics.Arcade.Body;

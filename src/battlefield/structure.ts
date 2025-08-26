@@ -1,3 +1,4 @@
+import { LAYERS } from "../utils/layers";
 import { BattlefieldConfig } from "./types";
 
 export type Structure = ReturnType<typeof makeStructure>;
@@ -16,23 +17,24 @@ export const makeStructure = (
 
     const group = scene.add
         .container(cx, cy)
-        .setSize(fieldConfig.squareSize, fieldConfig.squareSize);
-    const rect = scene.add.rectangle(
-        0,
-        0,
-        fieldConfig.squareSize,
-        fieldConfig.squareSize,
-        backgroundColor,
-        backgroundAlpha
-    ).setOrigin(0.5, 0.5).setScale(0.9);
+        .setSize(fieldConfig.squareSize, fieldConfig.squareSize)
+        .setDepth(LAYERS.BATTLEFIELD_TOWERS);
+    const rect = scene.add
+        .rectangle(
+            0,
+            0,
+            fieldConfig.squareSize,
+            fieldConfig.squareSize,
+            backgroundColor,
+            backgroundAlpha
+        )
+        .setOrigin(0.5, 0.5)
+        .setScale(0.9);
     const text = scene.add
         .text(0, 0, icon)
         .setFontSize(fieldConfig.squareSize * 2)
         .setAlign("center")
-        .setDisplayOrigin(
-            fieldConfig.squareSize,
-            fieldConfig.squareSize
-        )
+        .setDisplayOrigin(fieldConfig.squareSize, fieldConfig.squareSize)
         .setScale(0.4);
 
     group.add(rect);

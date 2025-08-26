@@ -1,5 +1,6 @@
-import { CardDisplay, createDisplayCard } from "./createCard";
-import { Card } from "./types";
+import { StateManagers } from "./types";
+import { CardDisplay, createDisplayCard } from "../deck/createCard";
+import { Card } from "../deck/types";
 
 const deg2Rad = (deg: number) => (deg * Math.PI) / 180;
 
@@ -20,20 +21,36 @@ const SELECTED_CARD_ARCDEG = deg2Rad(4);
 // The radius of the circle that the cards are arranged on.
 const CARD_ARC_RADIUS = 2000;
 
-export class DeckUI {
+export interface HandUIHandlers {
+    dragCard: (card: Card) => void;
+    releaseCard: () => void;
+//     playCard: (card: Card) => void;
+//     clickCard: (card: Card) => void;
+}
+
+export class HandUI {
     scene: Phaser.Scene;
     cards: CardDisplay[];
     hoveredCardIndex: number;
     draggedCardIndex: number;
-    playCard: (card: Card) => void;
+    handlers: HandUIHandlers;
+    managers: StateManagers;
 
-    constructor(scene: Phaser.Scene, playCard: (card: Card) => void) {
+    dragStartPosition = { x: 0, y: 0 };
+
+    constructor(
+        scene: Phaser.Scene,
+        managers: StateManagers,
+        handlers: HandUIHandlers
+    ) {
         this.scene = scene;
         this.cards = [];
         this.hoveredCardIndex = -1;
         this.draggedCardIndex = -1;
+        this.handlers = handlers;
+        this.managers = managers;
 
-        this.playCard = playCard;
+        this.scene.input.on("dragend", this.endDragCard.bind(this));
     }
 
     addCard(card: Card) {
@@ -47,22 +64,24 @@ export class DeckUI {
         this.cards.push(cardDisplay);
 
         cardDisplay.rectangle.on(Phaser.Input.Events.POINTER_OVER, () => {
-            this.hoverCard(this.cards.indexOf(cardDisplay));
+            const index = this.cards.indexOf(cardDisplay);
+            this.hoverCard(index);
+            // console.log("pointer over", index, this.hoveredCardIndex)
             this.scene.input.setDefaultCursor("pointer");
         });
 
         cardDisplay.rectangle.on(Phaser.Input.Events.POINTER_OUT, () => {
+            // console.log("pointer out", this.draggedCardIndex)
+            if(this.draggedCardIndex !== -1) return;
             this.unhoverCard();
             this.scene.input.setDefaultCursor("default");
         });
 
-        cardDisplay.rectangle.on(Phaser.Input.Events.POINTER_DOWN, () => {
-            this.hoveredCardIndex = -1;
-            this.cards = this.cards.filter((c) => c.gameObject !== cardDisplay.gameObject);
-            cardDisplay.gameObject.destroy();
-            this.arrangeCards();
-            this.playCard(card);
-        });
+        cardDisplay.rectangle.on(Phaser.Input.Events.POINTER_UP, this.endDragCard.bind(this));
+
+        cardDisplay.rectangle.on(Phaser.Input.Events.POINTER_DOWN, this.startDragCard.bind(this));
+
+        // cardDisplay.rectangle.input.
 
         this.arrangeCards();
     }
@@ -132,5 +151,50 @@ export class DeckUI {
         if (this.hoveredCardIndex === -1) return;
         this.hoveredCardIndex = -1;
         this.arrangeCards();
+    }
+
+    startDragCard(pointer: Phaser.Input.Pointer) {
+        this.dragStartPosition = { x: pointer.x, y: pointer.y };
+        this.draggedCardIndex = this.hoveredCardIndex;
+        // console.log("start drag card", this.hoveredCardIndex, this.draggedCardIndex, this.draggedCard, this.dragStartPosition);
+        this.arrangeCards();
+        this.handlers.dragCard(this.draggedCard!);
+    }
+
+    endDragCard(pointer: Phaser.Input.Pointer = {x: -1, y: -1} as any as Phaser.Input.Pointer) {
+        // console.log("up", pointer, args)
+        if(this.draggedCardIndex === -1) return;
+        if(pointer.x === this.dragStartPosition.x && pointer.y === this.dragStartPosition.y) return;
+
+        this.handlers.releaseCard();
+
+        this.hoveredCardIndex = -1;
+        this.draggedCardIndex = -1;
+        // console.log("end drag card", this.draggedCard);
+
+        this.arrangeCards();
+    }
+
+    playCard() {
+        const cardObject = this.cards[this.draggedCardIndex];
+        this.cards.splice(this.draggedCardIndex, 1);
+
+        cardObject.gameObject.destroy();
+
+        console.log("play card", cardObject.card, this.draggedCardIndex);
+
+        this.endDragCard();
+    }
+
+    get draggedCard() {
+        return this.draggedCardIndex === -1
+            ? null
+            : this.managers.deck.hand[this.draggedCardIndex];
+    }
+
+    get draggedCardDisplay() {
+        return this.draggedCardIndex === -1
+            ? null
+            : this.cards[this.draggedCardIndex].gameObject;
     }
 }
